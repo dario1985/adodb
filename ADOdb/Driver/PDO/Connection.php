@@ -2,13 +2,15 @@
 
 namespace ADOdb\Driver\PDO;
 
-use ADOdb\Driver\FieldData as ADODB_PDO_FieldData,
-    ADOdb\Driver\ResultSet as ADODB_PDO_ResultSet;
+use \PDO as PDO,
+    ADOdb\Connection as ADODB_Connection,
+    ADOdb\Driver\PDO\FieldData as ADODB_PDO_FieldData,
+    ADOdb\Driver\PDO\ResultSet as ADODB_PDO_ResultSet;
 
 /**
 * Connection and query wrapper
 */
-class Connection extends ADOdb\Connection
+class Connection extends ADODB_Connection
 {
     const FETCH_NUM = PDO::FETCH_NUM;
     const FETCH_ASSOC = PDO::FETCH_ASSOC;
@@ -123,7 +125,7 @@ class Connection extends ADOdb\Connection
 	{
 		$st = $this->DoQuery($sql, $vars);
 		$this->affected_rows = $st->rowCount();
-		return $st?new ADODB_PDO_ResultSet($st):false;
+		return $st ? new ADODB_PDO_ResultSet($st):false;
 	}
 
 	/**
@@ -253,5 +255,25 @@ class Connection extends ADOdb\Connection
 		$st->setFetchMode($this->fetchmode);
 		if(!is_array($vars)) $vars = array($vars);
 		return $st->execute($vars)?$st:false;
+	}
+
+	/**
+	* qstr: Quote a string for use in database queries
+	* @param in String parameter to quote
+	* @return String quoted by database
+	*/
+	public function qstr($in)
+	{
+		return $this->_db->quote($in);
+	}
+	
+	/**
+	* quote: Quote a string for use in database queries
+	* @param in String parameter to quote
+	* @return String quoted by database
+	*/
+	public function quote($in)
+	{
+		return $this->_db->quote($in);
 	}
 }

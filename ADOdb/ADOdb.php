@@ -12,9 +12,9 @@ function NewADOConnection($connector)
 
 function ADODB_AutoLoader($sClass)
 {
-    $sLibPath = __DIR__ . DIRECTORY_SEPARATOR . 'ADOdb' . DIRECTORY_SEPARATOR;
-    $sClassFile = str_replace('\\', DIRECTORY_SEPARATOR, $sClass).'.php';
-    $sClassPath = $sLibPath.$sClassFile;
+    $sLibPath = __DIR__ . DIRECTORY_SEPARATOR;
+    $sClassFile = str_replace('\\', DIRECTORY_SEPARATOR, str_replace('ADOdb\\', '', $sClass)).'.php';
+    $sClassPath = $sLibPath . $sClassFile;
     if (file_exists($sClassPath)) {
         require($sClassPath);
     }

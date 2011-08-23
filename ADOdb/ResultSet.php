@@ -7,11 +7,8 @@ use ADOdb\Driver\ResultSet as DriverResultSet;
 /**
 * Resultset wrapper
 */
-class ResultSet implements DriverResultSet;
+abstract class ResultSet implements DriverResultSet
 {
-	/** PDO resultset to wrap */
-	protected $_st;
-	
 	/** One-time resultset information */
 	protected $results;
 	protected $rowcount;
@@ -22,19 +19,6 @@ class ResultSet implements DriverResultSet;
 
 	/** Public end-of-resultset flag */
 	public $EOF;
-
-	/**
-	* Constructor: Initialise resultset and first results
-	* @param st PDOStatement object to wrap
-	*/
-	public function __construct($st)
-	{
-		$this->_st = $st;
-		$this->results = $st->fetchAll();
-		$this->rowcount = count($this->results);
-		$this->cursor = 0;
-		$this->MoveNext();
-	}
 
 	/**
 	* RecordCount: Retrieve number of records in this RS
@@ -50,7 +34,12 @@ class ResultSet implements DriverResultSet;
 	*/
 	public function MoveNext()
 	{
-		$this->fields = $this->results[$this->cursor++];
-		$this->EOF = ($this->cursor == $this->rowcount) ? 1 : 0;
+        if ($this->cursor < $this->rowcount) {
+		    $this->EOF = false;
+       		$this->fields = $this->results[$this->cursor++];
+        } else {
+            $this->EOF = true;
+            $this->fields = array();
+        }
 	}
 }

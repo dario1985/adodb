@@ -2,10 +2,12 @@
 
 namespace ADOdb\Driver\PDO;
 
+use ADOdb\FieldData as ADODB_FieldData;
+
 /**
 * Table field information wrapper
 */
-class FieldData extends ADOdb\FieldData
+class FieldData extends ADODB_FieldData
 {
 	/**
 	* Constructor: Map PDO meta information to object field data
