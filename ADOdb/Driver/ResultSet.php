@@ -2,7 +2,7 @@
 
 namespace ADOdb\Driver;
 
-interface ResultSet
+interface ResultSet extends \Iterator
 {
 	/**
 	* RecordCount: Retrieve number of records in this RS

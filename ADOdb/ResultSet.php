@@ -34,12 +34,13 @@ abstract class ResultSet implements DriverResultSet
 	*/
 	public function MoveNext()
 	{
-        if ($this->cursor < $this->rowcount) {
+	        if ($this->cursor < $this->rowcount) {
 		    $this->EOF = false;
-       		$this->fields = $this->results[$this->cursor++];
-        } else {
-            $this->EOF = true;
-            $this->fields = array();
-        }
+		    $this->next();
+		    $this->cursor++;
+	        } else {
+        	    $this->EOF = true;
+	            $this->fields = array();
+	        }
 	}
 }
