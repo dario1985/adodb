@@ -5,56 +5,49 @@ namespace ADOdb\Driver\PDO;
 use ADOdb\ResultSet as ADODB_Resultset;
 
 /**
-* Resultset PDO
-*/
+ * Resultset PDO
+ */
 class ResultSet extends ADODB_Resultset
 {
-    /** PDO resultset to wrap */
-    protected $_st;
-    
+
     /**
-    * Constructor: Initialise resultset and first results
-    * @param st PDOStatement object to wrap
-    */
-    public function __construct($st)
+     * PDOStatement object to wrap 
+     * @var PDOStatement
+     */
+    protected $_st;
+
+    /**
+     * Constructor: Initialise resultset and first results
+     * @param st PDOStatement object to wrap
+     */
+    public function __construct(PDOStatement $st)
     {
         $this->_st = $st;
-        $this->rowcount = $this->_st->rowCount();
+        $this->numOfRows = $this->_st->rowCount();
+        $this->currentRow = -1;
         $this->MoveNext();
     }
 
-    public function &current()
+    /**
+     * Fetch a specific row in the recordset. 
+     *
+     * @param rowNumber is the row to move to (0-based)
+     */
+    protected function fetchRow($rowNumber = 0)
     {
-        return $this->fields;
+        $this->fields = $this->_st->fetch(
+                PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $rowNumber
+        );
     }
 
-    public function next()
+    /**
+     * Clean up recordset
+     *
+     * @return true or false
+     */
+    public function Close()
     {
-        $this->fields = $this->_st->fetch();
+        return $this->_st->closeCursor();
     }
 
-    public function key()
-    {
-        return $this->cursor;
-    }
-
-    public function valid()
-    {
-        return ($this->fields === false ? false : true);
-    }
-
-    public function rewind()
-    {
-        return true;
-    }
-
-    public function _close()
-    {
-        $this->_st->closeCursor();
-    } 
-
-    public function __destruct()
-    {
-        $this->_close();
-    }
 }

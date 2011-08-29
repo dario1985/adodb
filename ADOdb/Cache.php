@@ -2,7 +2,7 @@
 
 namespace ADOdb;
 
-use ADOdb\Drivers\Cache as DriverCache
+use ADOdb\Drivers\Cache as DriverCache;
 
 abstract class Cache implements DriverCache
 {
