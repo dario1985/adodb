@@ -4,7 +4,7 @@ namespace ADOdb\Driver\PDO;
 
 use \PDO as PDO,
     ADOdb\Connection as ADODB_Connection,
-    ADOdb\Driver\PDO\FieldData as ADODB_PDO_FieldData,
+    ADOdb\Driver\PDO\FieldObject as ADODB_PDO_FieldObject,
     ADOdb\Driver\PDO\ResultSet as ADODB_PDO_ResultSet;
 
 /**
@@ -222,7 +222,7 @@ class Connection extends ADODB_Connection
     /**
      * MetaColumns: Retrieve information about a table's columns
      * @param table String name of table to find out about
-     * @return Array of ADODB_PDO_FieldData objects
+     * @return Array of ADODB_PDO_FieldObject objects
      */
     public function MetaColumns($table)
     {
@@ -230,7 +230,7 @@ class Connection extends ADODB_Connection
 
         $st = $this->pdoQuery('select * from ' . $table);
         for ($i = 0; $i < $st->columnCount(); $i++)
-            $out[] = new ADODB_PDO_FieldData($st->getColumnMeta($i));
+            $out[] = new ADODB_PDO_FieldObject($st->getColumnMeta($i));
 
         return $out;
     }

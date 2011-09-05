@@ -11,11 +11,6 @@ interface ResultSet extends \IteratorAggregate
      */
     public function RecordCount();
 
-    /**
-     * MoveNext: Fetch next row and check if we're at the end
-     */
-    public function MoveNext();
-
     /*
      * Some databases allow multiple recordsets to be returned. This function
      * will return true if there is a next recordset, or false if no more.
@@ -82,7 +77,7 @@ interface ResultSet extends \IteratorAggregate
      *
      * @return the object with the properties set to the fields of the current row
      */
-    public function FetchObj();
+    //public function FetchObj();
 
     /**
      * Return the fields array of the current row as an object for convenience.
@@ -92,7 +87,7 @@ interface ResultSet extends \IteratorAggregate
      *
      * @return the object with the properties set to the fields of the current row
      */
-    public function FetchObject($isupper=true);
+    //public function FetchObject($isupper=true);
 
     /**
      * Return the fields array of the current row as an object for convenience.
@@ -101,7 +96,7 @@ interface ResultSet extends \IteratorAggregate
      * @return the object with the properties set to the fields of the current row,
      * 	or false if EOF
      */
-    public function FetchNextObj();
+    //public function FetchNextObj();
 
     /**
      * Return the fields array of the current row as an object for convenience. 
@@ -112,7 +107,7 @@ interface ResultSet extends \IteratorAggregate
      * @return the object with the properties set to the fields of the current row,
      * 	or false if EOF
      */
-    public function FetchNextObject($isupper=true);
+    //public function FetchNextObject($isupper=true);
 
     /**
      * Clean up recordset

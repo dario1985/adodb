@@ -3,9 +3,9 @@
 namespace ADOdb;
 
 /**
- * RecordsetIterator
+ * ResultsetIterator
  */
-class RecordsetIterator extends \Iterator
+class ResultsetIterator implements \Iterator
 {
     protected $rs;
 

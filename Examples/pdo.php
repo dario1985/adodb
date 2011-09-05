@@ -4,10 +4,10 @@ require __DIR__ . '/../ADOdb/ADOdb.php';
 
 $db = NewADOConnection('mysql');
 $db->Connect('localhost', 'root', 'root');
-$rs = $db->Execute('SELECT 1');
+$rs = $db->Execute("SELECT 'dummy text' result");
 
 while (!$rs->EOF) {
-    var_dump($rs->fields);
+    echo 'Text: '. $rs->fields['result'] . "\n"; 
     $rs->MoveNext();
 }
 

@@ -2,12 +2,10 @@
 
 namespace ADOdb;
 
-use ADOdb\Driver\FieldData as DriverFieldData;
-
 /**
  * Table field information wrapper
  */
-abstract class FieldData extends DriverFieldData
+abstract class FieldObject
 {
 
     public $name;

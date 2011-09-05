@@ -12,6 +12,7 @@ abstract class ResultSet implements DriverResultSet
 
     /** One-time resultset information */
     protected $numOfRows = 0;
+    protected $numOfFields = 0;
     protected $currentRow = -1;
     protected $canSeek = true;
 
@@ -19,7 +20,7 @@ abstract class ResultSet implements DriverResultSet
     public $fields = false;
 
     /** Public end-of-resultset flag */
-    public $EOF = true;
+    public $EOF = false;
 
     public function __destruct()
     {
@@ -39,7 +40,7 @@ abstract class ResultSet implements DriverResultSet
      */
     public function getIterator()
     {
-        return new RecordsetIterator($this);
+        return new ResultsetIterator($this);
     }
 
     /**
@@ -108,7 +109,7 @@ abstract class ResultSet implements DriverResultSet
     {
         if (!$this->EOF) {
             if ($this->numOfRows > ++$this->currentRow) {
-                $this->fields = $this->fetchRow($pos);
+                $this->fields = $this->fetchRow($this->currentRow);
                 return true;
             } else {
                 $this->fields = false;
@@ -160,5 +161,27 @@ abstract class ResultSet implements DriverResultSet
     {
         return $this->fields[$colname];
     }
+
+    /**
+     * Get the ADOFieldObjects of all columns in an array.
+     *
+     */
+    public function FieldTypesArray()
+    {
+        $arr = array();
+        for ($i=0, $max=$this->numOfFields; $i < $max; $i++) {
+            $arr[] = $this->FetchField($i);
+    }
+        return $arr;
+    }
+
+    /**
+     * @return the number of columns in the recordset. Some databases will set this to 0
+     * if no records are returned, others will return the number of columns in the query.
+     */
+    public function FieldCount() 
+    {
+        return $this->numOfFields;
+    }   
 
 }
