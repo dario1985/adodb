@@ -19,7 +19,18 @@ abstract class Connection implements DriverConnection
     {
         switch ($connector) {
             default:
-    	    return new ADODB_PDO_Connection($connector);
+            return new ADODB_PDO_Connection($connector);
         }
+    }
+
+    /**
+     * Run a command that will talk to the connection
+     *
+     * @param Command $command
+     * @return boolean
+     */
+    protected function execCommand(Command $command)
+    {
+        return $command->execute($this);
     }
 }
