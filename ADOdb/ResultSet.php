@@ -7,7 +7,7 @@ use ADOdb\Driver\ResultSet as DriverResultSet;
 /**
  * Resultset
  */
-abstract class ResultSet implements DriverResultSet
+abstract class ResultSet implements DriverResultSet,
                                     \Serializable
 {
 
