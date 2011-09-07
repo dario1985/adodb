@@ -10,7 +10,7 @@ abstract class Command
      *
      * @return mixed | null
      */
-    public function execute(Connection $connection)
+    final public function execute(Connection $connection)
     {
         $this->connection = $connection;
         if ($rs = $this->doQuery()) {

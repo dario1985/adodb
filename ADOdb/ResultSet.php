@@ -8,6 +8,7 @@ use ADOdb\Driver\ResultSet as DriverResultSet;
  * Resultset
  */
 abstract class ResultSet implements DriverResultSet
+                                    \Serializable
 {
 
     /** One-time resultset information */
@@ -18,9 +19,15 @@ abstract class ResultSet implements DriverResultSet
 
     /** Publically accessible row values */
     public $fields = false;
+    public $timeCreated;
 
     /** Public end-of-resultset flag */
     public $EOF = false;
+
+    public function __construct()
+    {
+        $this->timeCreated = time();
+    }
 
     public function __destruct()
     {
@@ -184,4 +191,11 @@ abstract class ResultSet implements DriverResultSet
         return $this->numOfFields;
     }   
 
+    public function serialize()
+    {
+    }
+
+    public function unserialize($data)
+    {
+    }
 }

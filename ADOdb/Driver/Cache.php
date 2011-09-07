@@ -4,8 +4,9 @@ namespace ADOdb\Driver;
 
 interface Cache 
 {
-    public function writecache($key, $contents, $debug, $secs2cache);
-    public function &readcache($key, &$err, $secs2cache, $rsClass);
-    public function flushcache($key, $debug=false)
-    public function flushall();
+    public function read($key, $ttl);
+    public function write($key, \ADOdb\RecordSet $value, $ttl);
+    public function flush($key);
+    public function flushAll();
+
 }

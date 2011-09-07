@@ -2,7 +2,7 @@
 
 namespace ADOdb;
 
-use ADOdb\Drivers\Cache as DriverCache;
+use ADOdb\Driver\Cache as DriverCache;
 
 abstract class Cache implements DriverCache
 {
@@ -13,11 +13,7 @@ abstract class Cache implements DriverCache
         switch ($type) {
             case self::TYPE_FILE:
             default:
-                return new Drivers\Cache\File();
+                return new Driver\Cache\File();
+	}
     }
-
-    abstract public function read($key, $ttl);
-    abstract public function write($key, $value, $ttl);
-    abstract public function flush($key);
-    abstract public function flushAll();
 }
