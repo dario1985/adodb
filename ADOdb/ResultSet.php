@@ -17,6 +17,10 @@ abstract class ResultSet implements DriverResultSet,
     protected $currentRow = -1;
     protected $canSeek = true;
 
+    protected $cache = null;
+    protected $numCacheHits = 0;
+    protected $numCacheMisses = 0;
+
     /** Publically accessible row values */
     public $fields = false;
     public $timeCreated;
@@ -41,6 +45,14 @@ abstract class ResultSet implements DriverResultSet,
      * @param rowNumber is the row to move to (0-based)
      */
     abstract protected function fetchRow($rowNumber = 0);
+
+    /**
+     * Create cache
+     */
+    public function setCache(Cache $cache)
+    {
+        $this->cache = $cache;
+    }
 
     /**
      * @return RecordsetIterator 
@@ -191,11 +203,29 @@ abstract class ResultSet implements DriverResultSet,
         return $this->numOfFields;
     }   
 
-    public function serialize()
+    
+    protected function checkCache($throwException = false)
     {
+	if (!$this->cache instanceof Cache) {
+            if ($throwException) throw new Exception('Cache not initialized');
+	    return false;
+	} else return true;
     }
 
+    /**
+     * Serialize
+     */
+    public function serialize()
+    {
+	return serialize($this);
+    }
+
+
+    /**
+     * Unserialize
+     */
     public function unserialize($data)
     {
+	return unserialize($data);
     }
 }
