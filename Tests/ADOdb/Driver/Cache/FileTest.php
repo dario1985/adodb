@@ -2,7 +2,7 @@
 namespace ADOdb\Driver\Cache;
 
 
-require_once '/home/likewise-open/OFICINAS/dario.mancuso/htdocs/adodb/ADOdb/ADOdb.php';
+
 
 /**
  * Test class for File.
