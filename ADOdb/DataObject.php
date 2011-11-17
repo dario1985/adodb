@@ -12,8 +12,8 @@ interface DataObject
     public function errorCode();
     public function errorInfo();
     public function execute($statement);
-    public function query ($statement);
+    public function query($statement, $vars = null);
     public function inTransaction();
-    public function getLastInsertId ($name = null);
+    public function getLastInsertId($name = null);
     public function rollBack();
 }

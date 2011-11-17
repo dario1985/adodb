@@ -10,17 +10,19 @@ namespace ADOdb\DataObject\PDO;
 
 use \PDO as PDO,
     \ADOdb\DataObject as ADODB_DataObject,
-    \ADOdb\Statement as ADODB_Statement,
     \ADOdb\DataSource as ADODB_DataSource;
 
 /**
  * Connection and query wrapper
  */
-class DataObject extends PDO implements ADODB_DataObject
+class DataObject extends PDO 
+                 implements ADODB_DataObject
 {
+    const FETCH_DEFAULT = PDO::FETCH_ASSOC;
+
     /** Connection information (database name is public) */
     protected $dsn;
-    protected $connector;
+    protected $dso;
     protected $hostname;
     protected $username;
     protected $password;
@@ -42,14 +44,14 @@ class DataObject extends PDO implements ADODB_DataObject
      * Constructor: Initialise connector
      * @param connector String denoting type of database
      */
-    public function __construct(ADODB_DataSource $datasource)
+    public function __construct(ADODB_DataSource $dso)
     {
-        $this->connector = $connector->getType();
-        $this->hostname = $connector->getHostname();
-        $this->username = $connector->getUsername();
-        $this->password = $connector->getPassword();
-        $this->database = $connector->getDatabase();
-        $this->pdoDriverOptions = $connector->getOptions();
+        $this->connector = $dso->getType();
+        $this->hostname = $dso->getHostname();
+        $this->username = $dso->getUsername();
+        $this->password = $dso->getPassword();
+        $this->database = $dso->getDatabase();
+        $this->pdoDriverOptions = $dso->getOptions();
         $this->dsn = $this->connector
             . ':host=' . $this->hostname
             . ';dbname=' . $this->database;
@@ -60,7 +62,7 @@ class DataObject extends PDO implements ADODB_DataObject
             $this->password
         );
 
-        $this->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL)
+        $this->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL);
         $this->setAttribute(
             PDO::ATTR_STATEMENT_CLASS,
             array('\ADOdb\DataObject\PDO\Statement')
@@ -70,7 +72,13 @@ class DataObject extends PDO implements ADODB_DataObject
             $this->setAttribute($attr, $value);
         }
 
-        $this->fetchmode = self::FETCH_ASSOC;
+        $this->setFetchMode(self::FETCH_DEFAULT);
+    }
+
+    public function setFetchMode($fetchMode)
+    {
+        parent::setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $fetchMode);
+        $this->fetchMode = $fetchMode;
     }
 
     public function setAttribute($attribute, $value = null)
@@ -93,9 +101,21 @@ class DataObject extends PDO implements ADODB_DataObject
      * Retrieve the ID of the last insert operation
      * @return String containing last insert ID
      */
-    public function getLastInsertId()
+    public function getLastInsertId($name = NULL)
     {
-        return $this->lastInsertId();
+        return $this->lastInsertId($name);
+    }
+
+    public function query($statement, $vars = NULL)
+    {
+	if ($vars !== NULL) {
+            $st = parent::prepare($statement);
+            if ($st->execute($vars) !== false) {
+                return $st;
+            } else {
+                return false;
+            }
+        } return parent::query($statement);
     }
 
     public function execute($sql, $vars=null)

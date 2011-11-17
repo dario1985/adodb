@@ -120,62 +120,73 @@ class DataSource
         return $this->options;
     }
 
+    public function getOption($name)
+    {
+        if (isset($this->options[$name]))
+            return $this->options[$name];
+    }
+
     public function setDsn($value)
     {
         $this->dsn = $value;
-        $parsed = $this->parseDSN($dsn);
+        $parsed = @$this->parseDSN($this->dsn);
         foreach ($parsed as $name => $value) {
             $this->$name = $value;
         }
         return $this;
     }
 
-    protected function setType($value)
+    public function setType($value)
     {
         $this->type = $value;
         return $this;
     }
 
-    protected function setDbsyntax($value)
+    public function setDbsyntax($value)
     {
         $this->dbsyntax = $value;
         return $this;
     }
 
-    protected function setProtocol($value)
+    public function setProtocol($value)
     {
         $this->protocol = $value;
         return $this;
     }
 
-    protected function setHostname($value)
+    public function setHostname($value)
     {
         $this->hostname = $value;
         return $this;
     }
 
-    protected function setPort($value)
+    public function setPort($value)
     {
         $this->port = (int) $value;
         return $this;
     }
 
-    protected function setDatabase($value)
+    public function setDatabase($value)
     {
         $this->database = $value;
         return $this;
     }
 
-    protected function setUsername($value)
+    public function setUsername($value)
     {
         $this->username = $value;
         return $this;
     }
 
-    protected function setPassword($value)
+    public function setPassword($value)
     {
         $this->password = $value;
         return $this;
+    }
+
+    public function setOption($name, $value)
+    {
+        $this->options[$name] = $value;
     }
 
     protected function setOptions($value)
@@ -195,11 +206,11 @@ class DataSource
 	 *
 	 * @return array an associative array with the following keys:
 	 *
-	 *  type: Database backend used in PHP (mysql, odbc etc.)
+	 *  type    : Database backend used in PHP (mysql, odbc etc.)
 	 *  dbsyntax: Database used with regards to SQL syntax etc.
 	 *  protocol: Communication protocol to use (tcp, unix etc.)
 	 *  hostname: Hostname specification
-     *  port : Port
+         *  port    : Port
 	 *  database: Database to use on the DBMS server
 	 *  username: User name for login
 	 *  password: Password for login
@@ -227,6 +238,6 @@ class DataSource
                 'password' => $p['password'],
                 'options'  => $options
             );
-        } else throw new InvalidArgumentException('Invalid DSN');
+        } else throw new \InvalidArgumentException('Invalid DSN: '. $dsn);
     }
 }

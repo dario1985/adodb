@@ -13,8 +13,7 @@
 */
 function NewADOConnection($dsn)
 {
-    $dso = new DataSource($dsn);
-    $Connection = ADOdb\Connection::create($dso);
+    $Connection = new ADOdb\Connection($dsn);
     return $Connection;
 }
 

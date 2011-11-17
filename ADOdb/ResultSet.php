@@ -34,12 +34,16 @@ class ResultSet implements \Serializable,
         $this->timeCreated = time();
         $this->statement = $statement;
         $this->canSeek = $statement->canSeek();
+        $this->currentRow = -1;
+        $this->moveNext();
     }
 
     public function __destruct()
     {
-        $this->statement->closeCursor();
-        $this->statement = null;
+        if ($this->statement) {
+            $this->statement->closeCursor();
+            $this->statement = null;
+        }
     }
 
     public function __get($name)
@@ -62,7 +66,7 @@ class ResultSet implements \Serializable,
      * RecordCount: Retrieve number of records in this RS
      * @return Integer number of records
      */
-    public function RecordCount()
+    public function recordCount()
     {
         if ($this->numOfRows === null) {
             $this->numOfRows = $this->statement->rowCount();
@@ -128,15 +132,16 @@ class ResultSet implements \Serializable,
     public function MoveNext()
     {
         if (!$this->EOF) {
-            if ($this->numOfRows > ++$this->currentRow) {
-                $this->fields = $this->fetch();
+            if ($this->recordCount() > ++$this->currentRow) {
+                $this->fields = $this->statement->fetch();
                 return true;
             } else {
                 $this->fields = false;
                 $this->EOF = true;
             }
-        } else
+        } else {
             return false;
+        }
     }
 
     /**
@@ -179,8 +184,8 @@ class ResultSet implements \Serializable,
         }
 
         $this->fields = false;
-		$this->EOF = true;
-		return false;
+        $this->EOF = true;
+        return false;
     }
 
     /**
@@ -228,7 +233,7 @@ class ResultSet implements \Serializable,
      */
     public function serialize()
     {
-	    return serialize($this);
+            return serialize($this);
     }
 
     /**
@@ -236,6 +241,6 @@ class ResultSet implements \Serializable,
      */
     public function unserialize($data)
     {
-	    return unserialize($data);
+            return unserialize($data);
     }
 }

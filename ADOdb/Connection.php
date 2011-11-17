@@ -13,6 +13,11 @@ namespace ADOdb;
  */
 class Connection
 {
+    const FETCH_DEFAULT = 0;
+    const FETCH_NUM     = 1;
+    const FETCH_ASSOC   = 2;
+    const FETCH_BOTH    = 3;
+
     protected $dso;
     protected $connection;
 
@@ -20,6 +25,7 @@ class Connection
     protected $username;
     protected $password;
     protected $database;
+    protected $fetchMode;
 
     protected $attributes = array();
 
@@ -42,9 +48,6 @@ class Connection
     public function close()
     {
         $this->dso = null;
-        if ($this->connection) {
-            $this->connection->close();
-        }
         $this->connection = null;
     }
 
@@ -61,7 +64,7 @@ class Connection
                             $database = null,
                             $options = array())
     {
-        if ($connection) {
+        if ($this->connection) {
             return false;
         }
 
@@ -78,7 +81,7 @@ class Connection
         return true;
     }
 
-    protected setAttribute($name, $value)
+    protected function setAttribute($name, $value)
     {
         if ($this->connection) {
             $this->connection->setAttribute($name, $value);
@@ -86,14 +89,14 @@ class Connection
         $this->attributes[$name] = $value;
     }
 
-    protected getAttribute($name)
+    protected function getAttribute($name)
     {
         return $this->attributes[$name];
     }
 
     protected static function create($dso)
     {
-        return new \ADOdb\DataObject\PDO\DataObject();
+        return new \ADOdb\DataObject\PDO\DataObject($dso);
     }
 
     public function getOne($statement, $vars = null)
@@ -152,7 +155,10 @@ class Connection
 
     public function execute($statement, array $vars = null)
     {
-        return new ResultSet($this->query($statement, $vars));
+        $st = $this->query($statement, $vars);
+        if ($st !== false) {
+            return new ResultSet($st);
+        } else return false;
     }
 
     /**
@@ -178,7 +184,7 @@ class Connection
             try {
                 $cache = $this->getCache();
                 $queryKey = $cache->getQueryKey($sql, $vars);
-                $statement = $cache->read($queryKey, $timeout));
+                $statement = $cache->read($queryKey, $timeout);
             } catch (\Exception $e) {
                 // To log debug info
             }
@@ -202,5 +208,22 @@ class Connection
     public function execCommand(Command $command)
     {
         return $command->execute($this);
+    }
+
+    public function setFetchMode($fetchMode)
+    {
+        if (!$c = $this->connection)
+            throw new ConnectionException('No connected!');
+        
+        switch($fetchMode) {
+            case self::FETCH_DEFAULT: 
+                return $c->setFetchMode($c::FETCH_DEFAULT);
+            case self::FETCH_ASSOC:
+                return $c->setFetchMode($c::FETCH_ASSOC);
+            case self::FETCH_NUM:
+                return $c->setFetchMode($c::FETCH_NUM);
+            case self::FETCH_BOTH:
+                return $c->setFetchMode($c::FETCH_BOTH);
+        }
     }
 }
