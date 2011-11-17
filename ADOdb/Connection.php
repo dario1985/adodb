@@ -102,9 +102,9 @@ class Connection
         return $statement->fetchColumn(0);
     }
 
-    public function cacheGetOne($statement, $vars = null)
+    public function cacheGetOne($timeout, $statement, $vars = null)
     {
-        $statement = $this->query($statement, $vars);
+        $statement = $this->cacheQuery($timeout, $statement, $vars);
         return $statement->fetchColumn(0);
     }
 
@@ -152,7 +152,7 @@ class Connection
 
     public function execute($statement, array $vars = null)
     {
-        return new RecordSet($this->query($statement, $vars));
+        return new ResultSet($this->query($statement, $vars));
     }
 
     /**
@@ -164,7 +164,7 @@ class Connection
      */
     public function cacheExecute($timeout, $statement, $vars = null)
     {
-        return new RecordSet($this->cacheQuery($timeout, $statement, $vars));
+        return new ResultSet($this->cacheQuery($timeout, $statement, $vars));
     }
 
     protected function query($statement, $vars = null)
