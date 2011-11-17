@@ -8,7 +8,12 @@
 
 namespace ADOdb;
 
-class Exception extends \Exception
+class Query
 {
-
+    protected $limit;
+    protected $offset;
+    protected $filter;
+    protected $model;
+    protected $fields;
 }
+

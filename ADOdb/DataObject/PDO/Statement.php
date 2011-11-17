@@ -6,9 +6,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace ADOdb;
+namespace ADOdb\Driver\PDO;
 
-class Exception extends \Exception
+class Statement extends \PDOStatement
+                implements \ADOdb\Driver\Statement
 {
 
 }

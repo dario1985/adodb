@@ -1,61 +1,57 @@
 <?php
+/*
+ * Copyright 2011 (c) Dario Mancuso
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
 namespace ADOdb;
 
-use ADOdb\Driver\ResultSet as DriverResultSet;
-
 /**
- * Resultset
+ * Resultset Class
  */
-abstract class ResultSet implements DriverResultSet,
-                                    \Serializable
+class ResultSet implements \Serializable,
+                           \IteratorAggregate
 {
-
-    /** One-time resultset information */
-    protected $numOfRows = 0;
-    protected $numOfFields = 0;
-    protected $currentRow = -1;
-    protected $canSeek = true;
-
     protected $cache = null;
-    protected $numCacheHits = 0;
-    protected $numCacheMisses = 0;
+    protected $statement = null;
 
-    /** Publically accessible row values */
-    public $fields = false;
-    public $timeCreated;
+    /* Publically accessible row values */
+    protected $fields = false;
+    protected $timeCreated;
+    protected $EOF = false;
+    protected $numOfRows = null;
+    protected $bufferedResults = null;
 
-    /** Public end-of-resultset flag */
-    public $EOF = false;
+    protected $publicProperties = array(
+        'fields',
+        'EOF'
+    );
 
-    public function __construct()
+    public function __construct(Statement $statement)
     {
         $this->timeCreated = time();
+        $this->statement = $statement;
+        $this->canSeek = $statement->canSeek();
     }
 
     public function __destruct()
     {
-        $this->Close();
+        $this->statement->closeCursor();
+        $this->statement = null;
     }
 
-    /**
-     * Fetch a specific row in the recordset. Some databases do not support
-     * access to previous rows in the databases (no scrolling backwards).
-     *
-     * @param rowNumber is the row to move to (0-based)
-     */
-    abstract protected function fetchRow($rowNumber = 0);
-
-    /**
-     * Create cache
-     */
-    public function setCache(Cache $cache)
+    public function __get($name)
     {
-        $this->cache = $cache;
+        if (in_array($name, $this->publicProperties)) {
+            return $this->$name;
+        }
     }
 
     /**
-     * @return RecordsetIterator 
+     * Interface
+     * @return RecordsetIterator
      */
     public function getIterator()
     {
@@ -68,29 +64,29 @@ abstract class ResultSet implements DriverResultSet,
      */
     public function RecordCount()
     {
+        if ($this->numOfRows === null) {
+            $this->numOfRows = $this->statement->rowCount();
+        }
         return $this->numOfRows;
     }
 
-    /**
-     * @return the current row in the recordset. If at EOF, will return the last row. 0-based.
-     */
-    public function CurrentRow()
+    public function currentRow()
     {
         return $this->currentRow;
     }
 
-    /*
+    /**
      * Some databases allow multiple recordsets to be returned. This function
      * will return true if there is a next recordset, or false if no more.
      */
-
     public function NextRecordSet()
     {
-        return false;
+        return $this->statement->nextRowset();
     }
 
     /**
-     * Move to the first row in the recordset. Many databases do NOT support this.
+     * Move to the first row in the recordset.
+     * Many databases do NOT support this.
      *
      * @return true or false
      */
@@ -102,16 +98,20 @@ abstract class ResultSet implements DriverResultSet,
     }
 
     /**
-     * Move to the last row in the recordset. 
+     * Move to the last row in the recordset.
      *
      * @return true or false
      */
     public function MoveLast()
     {
-        if ($this->numOfRows >= 0)
-            return $this->Move($this->numOfRows - 1);
+        if ($this->numOfRows > 0)
+            return $this->Move($this->numOfRows - 2);
+
+        /* Compat?
+
         if ($this->EOF)
             return false;
+
         while (!$this->EOF) {
             $f = $this->fields;
             $this->MoveNext();
@@ -119,6 +119,7 @@ abstract class ResultSet implements DriverResultSet,
         $this->fields = $f;
         $this->EOF = false;
         return true;
+        */
     }
 
     /**
@@ -128,7 +129,7 @@ abstract class ResultSet implements DriverResultSet,
     {
         if (!$this->EOF) {
             if ($this->numOfRows > ++$this->currentRow) {
-                $this->fields = $this->fetchRow($this->currentRow);
+                $this->fields = $this->fetch();
                 return true;
             } else {
                 $this->fields = false;
@@ -139,39 +140,53 @@ abstract class ResultSet implements DriverResultSet,
     }
 
     /**
-     * Random access to a specific row in the recordset. Some databases do not support
+     * Random access to a specific row in the recordset.
+     * Some databases do not support
      * access to previous rows in the databases (no scrolling backwards).
      *
      * @param rowNumber is the row to move to (0-based)
      *
-     * @return true if there still rows available, or false if there are no more rows (EOF).
+     * @return true if there still rows available,
+     *         or false if there are no more rows (EOF).
      */
     public function Move($rowNumber = 0)
     {
         $this->EOF = false;
-        if ($rowNumber == $this->currentRow)
+
+        if ($this->numOfRows > 0 && $rowNumber >= $this->numOfRows) {
+            $rowNumber = $this->numOfRows - 2; // Overflow to last record
+        }
+
+        if ($rowNumber == $this->currentRow) {
             return true;
+        }
 
         if ($this->canSeek) {
-            $fields = $this->fetchRow($rowNumber);
-            if ($fields) {
-                $this->fields = $fields;
-                $this->currentRow = $rowNumber;
-                return true;
-            } else {
-                $this->fields = false;
-                $this->EOF = true;
-                return false;
-            }
+            $fields = $this->statement->fetch($rowNumber);
         } else {
-            throw new Exception('Seek feature not supported');
+            if ($this->bufferedResults === null) {
+                $this->bufferedResults = new ArrayIterator(
+                    $this->statement->fetchAll()
+                );
+            }
+            $fields = $this->bufferedResults[$rowNumber];
         }
+
+        if ($fields) {
+            $this->fields = $fields;
+            $this->currentRow = $rowNumber;
+            return true;
+        }
+
+        $this->fields = false;
+		$this->EOF = true;
+		return false;
     }
 
     /**
      * Get the value of a field in the current row by column name.
      * Will not work if ADODB_FETCH_MODE is set to ADODB_FETCH_NUM.
-     * 
+     *
      * @param colname  is the field to access
      *
      * @return the value of $colname column
@@ -195,21 +210,17 @@ abstract class ResultSet implements DriverResultSet,
     }
 
     /**
-     * @return the number of columns in the recordset. Some databases will set this to 0
-     * if no records are returned, others will return the number of columns in the query.
+     * @return the number of columns in the recordset.
+     * Some databases will set this to 0
+     * if no records are returned, others will return
+     * the number of columns in the query.
      */
-    public function FieldCount() 
+    public function FieldCount()
     {
+        if ($this->numOfFields === null) {
+            $this->numOfFields = $this->statement->columnCount();
+        }
         return $this->numOfFields;
-    }   
-
-    
-    protected function checkCache($throwException = false)
-    {
-	if (!$this->cache instanceof Cache) {
-            if ($throwException) throw new Exception('Cache not initialized');
-	    return false;
-	} else return true;
     }
 
     /**
@@ -217,15 +228,14 @@ abstract class ResultSet implements DriverResultSet,
      */
     public function serialize()
     {
-	return serialize($this);
+	    return serialize($this);
     }
-
 
     /**
      * Unserialize
      */
     public function unserialize($data)
     {
-	return unserialize($data);
+	    return unserialize($data);
     }
 }
