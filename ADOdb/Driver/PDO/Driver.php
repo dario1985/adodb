@@ -6,17 +6,17 @@
  * with this source code in the file LICENSE.
  */
 
-namespace ADOdb\DataObject\PDO;
+namespace ADOdb\Driver\PDO;
 
 use \PDO as PDO,
-    \ADOdb\DataObject as ADODB_DataObject,
+    \ADOdb\Driver as ADODB_Driver,
     \ADOdb\DataSource as ADODB_DataSource;
 
 /**
  * Connection and query wrapper
  */
-class DataObject extends PDO 
-                 implements ADODB_DataObject
+class Driver extends PDO 
+                 implements ADODB_Driver
 {
     const FETCH_DEFAULT = PDO::FETCH_ASSOC;
 
@@ -65,7 +65,7 @@ class DataObject extends PDO
         $this->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL);
         $this->setAttribute(
             PDO::ATTR_STATEMENT_CLASS,
-            array('\ADOdb\DataObject\PDO\Statement')
+            array('\ADOdb\Driver\PDO\Statement')
         );
 
         foreach ($this->pdoDriverOptions as $attr => &$value) {

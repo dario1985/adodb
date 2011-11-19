@@ -5,7 +5,7 @@ namespace ADOdb;
 /**
 * Data Object Interface
 */
-interface DataObject
+interface Driver
 {
     public function beginTransaction();
     public function commit();

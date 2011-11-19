@@ -6,7 +6,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace ADOdb\DataObject\PDO;
+namespace ADOdb\Driver\PDO;
 
 class Statement extends \PDOStatement
                 implements \ADOdb\Statement
