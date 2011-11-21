@@ -108,7 +108,7 @@ class Driver extends PDO
 
     public function query($statement, $vars = NULL)
     {
-	if ($vars !== NULL) {
+    if ($vars !== NULL) {
             $st = parent::prepare($statement);
             if ($st->execute($vars) !== false) {
                 return $st;

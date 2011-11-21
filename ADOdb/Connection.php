@@ -102,6 +102,21 @@ class Connection
         return $this->attributes[$name];
     }
 
+    public function setCache(Cache $cache)
+    {
+        $this->cache = $cache;
+    }
+    
+    public function hasCache()
+    {
+        return ($this->cache !== null);
+    }
+    
+    protected function getCache()
+    {
+        return $this->cache;
+    }
+    
     /**
      * Start new transaction
      * 
@@ -331,19 +346,20 @@ class Connection
     protected function cacheQuery($timeout, $statement, $vars = null)
     {
         if ($this->hasCache()) {
+            $st = null;
             try {
                 $cache = $this->getCache();
-                $queryKey = $cache->getQueryKey($sql, $vars);
-                $statement = $cache->read($queryKey, $timeout);
+                $queryKey = $cache->getQueryKey($statement, $vars);
+                $st = $cache->read($queryKey, $timeout);
             } catch (\Exception $e) {
                 // To log debug info
             }
-            if ($statement === null) {
+            if (!$st) {
                 // Cache miss
-                $statement = $this->connection->query($sql, $vars);
-                $cache->write($queryKey, $statement, $timeout);
+                $st = $this->connection->query($statement, $vars);
+                $cache->write($queryKey, $st, $timeout);
             }
-            return $statement;
+            return $st;
         } else {
             throw new ConnectionException('No cache engine found!');
         }

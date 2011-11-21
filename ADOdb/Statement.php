@@ -21,4 +21,5 @@ interface Statement
     public function fetchColumn($column_number = 0);
     public function getColumnMeta($column_number = 0);
     public function close();
+    public function createdTime();
 }

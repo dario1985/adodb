@@ -13,7 +13,18 @@ use ADOdb\FieldObject as ADODB_FieldObject;
 class Statement extends \PDOStatement
                 implements \ADOdb\Statement
 {
-
+    protected $createdTime;
+    
+    protected function __construct()
+    {
+        $this->createdTime = time();
+    }
+    
+    public function createdTime()
+    {
+        return $this->createdTime();
+    }
+    
     public function canSeek()
     {
         return false;

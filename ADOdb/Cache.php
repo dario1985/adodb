@@ -14,9 +14,13 @@ abstract class Cache implements DriverCache
 {
     const TYPE_FILE = 1;
 
-    public function getQueryKey($sql, $params)
+    public function getQueryKey($sql, $params = null)
     {
-        return '';
+        if ($params) {
+            return md5($sql.implode('', $params));
+        } else {
+            return md5($sql);
+        }
     }
 
     public static function create($type = self::TYPE_FILE)
@@ -26,6 +30,6 @@ abstract class Cache implements DriverCache
             default:
                 $cache = new Driver\Cache\File();
                 return $cache;
-	    }
+        }
     }
 }

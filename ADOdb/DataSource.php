@@ -200,25 +200,25 @@ class DataSource
     }
 
     /**
-	 * Parse a data source name
-	 *
-	 * @param $dsn string Data Source Name to be parsed
-	 *
-	 * @return array an associative array with the following keys:
-	 *
-	 *  type    : Database backend used in PHP (mysql, odbc etc.)
-	 *  dbsyntax: Database used with regards to SQL syntax etc.
-	 *  protocol: Communication protocol to use (tcp, unix etc.)
-	 *  hostname: Hostname specification
+     * Parse a data source name
+     *
+     * @param $dsn string Data Source Name to be parsed
+     *
+     * @return array an associative array with the following keys:
+     *
+     *  type    : Database backend used in PHP (mysql, odbc etc.)
+     *  dbsyntax: Database used with regards to SQL syntax etc.
+     *  protocol: Communication protocol to use (tcp, unix etc.)
+     *  hostname: Hostname specification
          *  port    : Port
-	 *  database: Database to use on the DBMS server
-	 *  username: User name for login
-	 *  password: Password for login
-	 *
-	 * The format of the supplied DSN is in its fullest form:
-	 *
-	 *  type(dbsyntax)://username:password@protocol+hostspec/database
-	 */
+     *  database: Database to use on the DBMS server
+     *  username: User name for login
+     *  password: Password for login
+     *
+     * The format of the supplied DSN is in its fullest form:
+     *
+     *  type(dbsyntax)://username:password@protocol+hostspec/database
+     */
     protected static function parseDSN($dsn)
     {
         if (preg_match(self::DSN_PARSE_REGEXP, $dsn, $p)) {

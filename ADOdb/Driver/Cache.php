@@ -6,12 +6,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace ADOdb\DataObject;
+namespace ADOdb\Driver;
 
 interface Cache
 {
     public function read($key, $ttl);
-    public function write($key, \ADOdb\RecordSet $value, $ttl);
+    public function write($key, \ADOdb\Statement $value, $ttl);
     public function flush($key);
     public function flushAll();
 

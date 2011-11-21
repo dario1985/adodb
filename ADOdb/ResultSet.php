@@ -138,7 +138,7 @@ class ResultSet implements \Serializable,
     {
         if (!$this->EOF) {
             if ($this->numOfRows > ++$this->currentRow) {
-                if ($this->bufferedResults !== null) {
+                if ($this->bufferedResults === null) {
                     $this->fields = $this->statement->fetch();
                 } else {
                     $this->fields = $this->bufferedResults[$this->currentRow];

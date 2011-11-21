@@ -24,11 +24,11 @@ class File extends \ADOdb\Cache
     public function read($key, $ttl)
     {
         $dirname = $this->getDirName($key);
-
-        if (file_exists($dirname . $key)) {
-            $rs = unserialize(file_get_contents($dirname . $key));
-            if ($rs instanceof \ADOdb\RecordSet) {
-                if ((time() - $rs->timeCreated) > $ttl) {
+        $file = $dirname . $key . '.cache';
+        if (file_exists($file)) {
+            $st = unserialize(file_get_contents($file));
+            if ($st instanceof \ADOdb\Statement) {
+                if ((time() - $st->getCreateTime()) > $ttl) {
                     $this->flush($key);
                     return false;
                 } else {
@@ -40,17 +40,17 @@ class File extends \ADOdb\Cache
         } else return false;
     }
 
-    public function write($key, \ADOdb\RecordSet $rs, $ttl)
+    public function write($key, \ADOdb\Statement $value, $ttl)
     {
         $dirname = $this->getDirName($key);
 
         if (!file_exists($dirname)) {
-            mkdir(dirname, $this->chmod, true);
+            mkdir($dirname, $this->chmod, true);
         }
 
         if ($this->isValidPath($dirname)) {
-            $data = serialize($rs);
-            if (file_put_contents($dirname . $key, $data, LOCK_EX)) {
+            $data = serialize($value);
+            if (file_put_contents($dirname . $key . '.cache', $data, LOCK_EX)) {
                 chmod($dirname . $key, $data, $this->chmod);
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache File: Cannot write into file');
@@ -89,7 +89,7 @@ class File extends \ADOdb\Cache
 
     protected function isValidPath($path)
     {
-        if (file_exists($path)) {
+        if (!file_exists($path)) {
             throw new \ADOdb\Exception('ADOdb Cache File: No such file or directory');
         } elseif (!is_writable($path)) {
             throw new \ADOdb\Exception(sprintf('ADOdb Cache File: Cannot write in \'%s\'', $path));
