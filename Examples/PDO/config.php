@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__ . '/../../ADOdb/ADOdb.php';
+
 define('TEST_PDO_HOSTNAME', 'localhost');
 define('TEST_PDO_USERNAME', 'root');
 define('TEST_PDO_PASSWORD', '');

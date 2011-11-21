@@ -32,7 +32,7 @@ class ResultsetIterator implements \Iterator
 
     public function key()
     {
-        return $this->rs->CurrentRow();
+        return $this->rs->currentRow();
     }
 
     public function current()
@@ -42,7 +42,7 @@ class ResultsetIterator implements \Iterator
 
     public function next()
     {
-        $this->rs->MoveNext();
+        $this->rs->moveNext();
     }
 
     public function __call($func, $params)

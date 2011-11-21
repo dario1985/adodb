@@ -8,6 +8,8 @@
 
 namespace ADOdb\Driver\PDO;
 
+use ADOdb\FieldObject as ADODB_FieldObject;
+
 class Statement extends \PDOStatement
                 implements \ADOdb\Statement
 {
@@ -15,5 +17,22 @@ class Statement extends \PDOStatement
     public function canSeek()
     {
         return false;
+    }
+    
+    public function close()
+    {
+        return $this->closeCursor();
+    }
+    
+    public function getColumnMeta($column_number = 0)
+    {
+        $pdo_metas = $this->getColumnMeta($column_number);
+        $field = new ADODB_FieldObject();
+        $field->_setDataInfo(array(
+            'name' => $pdo_metas['name'],
+            'max_length' => $pdo_metas['len'],
+            'type' => $pdo_metas['native_type'],
+        ));
+        return $field;
     }
 }

@@ -19,4 +19,6 @@ interface Statement
     public function fetch($offset = null);
     public function fetchAll();
     public function fetchColumn($column_number = 0);
+    public function getColumnMeta($column_number = 0);
+    public function close();
 }

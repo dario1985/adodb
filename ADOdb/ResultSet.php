@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright 2011 (c) Dario Mancuso
  *
@@ -11,9 +12,10 @@ namespace ADOdb;
 /**
  * Resultset Class
  */
-class ResultSet implements \Serializable,
+class ResultSet implements \Serializable, 
                            \IteratorAggregate
 {
+
     protected $cache = null;
     protected $statement = null;
 
@@ -22,11 +24,14 @@ class ResultSet implements \Serializable,
     protected $timeCreated;
     protected $EOF = false;
     protected $numOfRows = null;
+    protected $numOfFields = null;
     protected $bufferedResults = null;
-
+    
     protected $publicProperties = array(
-        'fields',
-        'EOF'
+        'timeCreated' => 1,
+        'numOfRows' => 1,
+        'fields' => 1,
+        'EOF' => 1
     );
 
     public function __construct(Statement $statement)
@@ -35,20 +40,21 @@ class ResultSet implements \Serializable,
         $this->statement = $statement;
         $this->canSeek = $statement->canSeek();
         $this->currentRow = -1;
+        $this->numOfRows = $this->recordCount();
         $this->moveNext();
     }
 
     public function __destruct()
     {
         if ($this->statement) {
-            $this->statement->closeCursor();
+            $this->statement->close();
             $this->statement = null;
         }
     }
 
     public function __get($name)
     {
-        if (in_array($name, $this->publicProperties)) {
+        if (isset($this->publicProperties[$name])) {
             return $this->$name;
         }
     }
@@ -83,7 +89,7 @@ class ResultSet implements \Serializable,
      * Some databases allow multiple recordsets to be returned. This function
      * will return true if there is a next recordset, or false if no more.
      */
-    public function NextRecordSet()
+    public function nextRecordSet()
     {
         return $this->statement->nextRowset();
     }
@@ -94,9 +100,9 @@ class ResultSet implements \Serializable,
      *
      * @return true or false
      */
-    public function MoveFirst()
+    public function moveFirst()
     {
-        if ($this->currentRow == 0)
+        if ($this->currentRow === 0)
             return true;
         return $this->Move(0);
     }
@@ -106,34 +112,37 @@ class ResultSet implements \Serializable,
      *
      * @return true or false
      */
-    public function MoveLast()
+    public function moveLast()
     {
         if ($this->numOfRows > 0)
             return $this->Move($this->numOfRows - 2);
 
-        /* Compat?
-
         if ($this->EOF)
             return false;
+        /* Compat?
 
-        while (!$this->EOF) {
-            $f = $this->fields;
-            $this->MoveNext();
-        }
-        $this->fields = $f;
-        $this->EOF = false;
-        return true;
-        */
+          while (!$this->EOF) {
+          $f = $this->fields;
+          $this->MoveNext();
+          }
+          $this->fields = $f;
+          $this->EOF = false;
+          return true;
+         */
     }
 
     /**
      * MoveNext: Fetch next row and check if we're at the end
      */
-    public function MoveNext()
+    public function moveNext()
     {
         if (!$this->EOF) {
-            if ($this->recordCount() > ++$this->currentRow) {
-                $this->fields = $this->statement->fetch();
+            if ($this->numOfRows > ++$this->currentRow) {
+                if ($this->bufferedResults !== null) {
+                    $this->fields = $this->statement->fetch();
+                } else {
+                    $this->fields = $this->bufferedResults[$this->currentRow];
+                }
                 return true;
             } else {
                 $this->fields = false;
@@ -154,7 +163,7 @@ class ResultSet implements \Serializable,
      * @return true if there still rows available,
      *         or false if there are no more rows (EOF).
      */
-    public function Move($rowNumber = 0)
+    public function move($rowNumber = 0)
     {
         $this->EOF = false;
 
@@ -170,9 +179,7 @@ class ResultSet implements \Serializable,
             $fields = $this->statement->fetch($rowNumber);
         } else {
             if ($this->bufferedResults === null) {
-                $this->bufferedResults = new ArrayIterator(
-                    $this->statement->fetchAll()
-                );
+                $this->bufferedResults = $this->statement->fetchAll();
             }
             $fields = $this->bufferedResults[$rowNumber];
         }
@@ -202,16 +209,26 @@ class ResultSet implements \Serializable,
     }
 
     /**
-     * Get the ADOFieldObjects of all columns in an array.
+     * Get the FieldObjects of all columns in an array.
      *
      */
-    public function FieldTypesArray()
+    public function fieldTypesArray()
     {
-        $arr = array();
-        for ($i=0, $max=$this->numOfFields; $i < $max; $i++) {
-            $arr[] = $this->FetchField($i);
+        $fields = array();
+        for ($i = 0, $max = $this->fieldCount(); $i < $max; $i++) {
+            $fields[] = $this->fetchField();
+        }
+        return $fields;
     }
-        return $arr;
+    
+    public function fetchField($column_number = 0)
+    {
+        $field = $this->statement->getColumnMeta($column_number);
+        if ($field !== false) {
+            return $field;
+        } else {
+            throw new \Exception('Driver don\' support Column Meta Data');
+        }
     }
 
     /**
@@ -220,7 +237,7 @@ class ResultSet implements \Serializable,
      * if no records are returned, others will return
      * the number of columns in the query.
      */
-    public function FieldCount()
+    public function fieldCount()
     {
         if ($this->numOfFields === null) {
             $this->numOfFields = $this->statement->columnCount();
@@ -233,7 +250,7 @@ class ResultSet implements \Serializable,
      */
     public function serialize()
     {
-            return serialize($this);
+        return serialize($this);
     }
 
     /**
@@ -241,6 +258,6 @@ class ResultSet implements \Serializable,
      */
     public function unserialize($data)
     {
-            return unserialize($data);
+        return unserialize($data);
     }
 }
