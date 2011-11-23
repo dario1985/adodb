@@ -7,6 +7,7 @@ define('TEST_PDO_USERNAME', 'root');
 define('TEST_PDO_PASSWORD', '');
 define('TEST_PDO_DATABASE', '');
 define('TEST_PDO_DSN', 'mysql://root@localhost');
+define('TTL_CACHE', 3600);
 
 
 /**

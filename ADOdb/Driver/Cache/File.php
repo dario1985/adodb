@@ -8,9 +8,9 @@
 
 namespace ADOdb\Driver\Cache;
 
-class File extends \ADOdb\Cache
+class File extends \ADOdb\Cache implements \ADOdb\Driver\Cache
 {
-    protected $cache_dir;
+    protected $cache_dir = '/tmp/adodb/';
     protected $chmod = 0777;
 
     public function setCacheDir($path)
@@ -27,11 +27,11 @@ class File extends \ADOdb\Cache
         if (file_exists($file)) {
             $st = $this->unserializeStatement(file_get_contents($file));
             if ($st instanceof \ADOdb\Statement) {
-                if ((time() - $st->getCreateTime()) > $ttl) {
+                if ((time() - $st->createdTime()) > $ttl) {
                     $this->flush($key);
                     return false;
                 } else {
-                    return $rs;
+                    return $st;
                 }
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache File: Cache is corrupted');
@@ -50,7 +50,7 @@ class File extends \ADOdb\Cache
             $data = $this->serializeStatement($value);
             $file = $this->getCacheFile($key);
             if (file_put_contents($file, $data, LOCK_EX)) {
-                chmod($file, $data, $this->chmod);
+                chmod($file, $this->chmod);
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache File: Cannot write into file');
             }
@@ -99,7 +99,7 @@ class File extends \ADOdb\Cache
 
     protected function getCacheFile($key)
     {
-        return $this->getDirName() . $key . '.cache';
+        return $this->getDirName($key) . $key . '.cache';
     }
 
     protected function getDirName($key)

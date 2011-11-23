@@ -13,6 +13,7 @@ use ADOdb\Driver\Cache as DriverCache;
 class Cache
 {
     const TYPE_FILE = 1;
+    const TYPE_APC = 2;
 
     public static function getQueryId($sql, array $params = null)
     {
@@ -26,10 +27,11 @@ class Cache
     public static function create($type = self::TYPE_FILE)
     {
         switch ($type) {
+            case self::TYPE_APC:
+                return new Driver\Cache\APC();
             case self::TYPE_FILE:
             default:
-                $cache = new Driver\Cache\File();
-                return $cache;
+                return new Driver\Cache\File();
         }
     }
 
@@ -37,16 +39,17 @@ class Cache
     {
         $RESULTSET = $statement->fetchAll($statement::FETCH_NUM);
         $COLUMN_META = array();
-        for ($col = 0, $nCols = $statement->columnCount(); $i < $nCols; $i++) {
+        for ($i = 0, $nCols = $statement->columnCount(); $i < $nCols; $i++) {
             $COLUMN_META[] = $statement->getColumnMeta($i);
         }
-        $CREATED = $statement->getCreatedTime();
+        $CREATED = $statement->createdTime();
         return serialize(compact('RESULTSET', 'COLUMN_META', 'CREATED'));
     }
 
     public static function unserializeStatement($serializedStatement)
     {
-        if ($rawSt = unserialize($serializedStatement)) {
+        $rawSt = unserialize($serializedStatement);
+        if ($rawSt !== null) {
             return new Driver\Cache\Statement($rawSt);
         } else {
             throw new Exception('Unserialize error');

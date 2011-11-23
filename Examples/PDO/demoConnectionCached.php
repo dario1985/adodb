@@ -2,8 +2,6 @@
 
 require 'config.php';
 
-define('TTL_CACHE', 3600);
-
 $db = NewADOConnection('mysql');
 $cache = ADOdb\Cache::create();
 $cache->setCacheDir('/tmp/adodb/');

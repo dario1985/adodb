@@ -17,9 +17,10 @@ interface Statement
     public function rowCount();
     public function canSeek();
     public function fetch($offset = null);
-    public function fetchAll();
+    public function fetchAll($fetch_style = null);
     public function fetchColumn($column_number = 0);
     public function getColumnMeta($column_number = 0);
     public function close();
     public function createdTime();
+    public function setFetchMode($mode);
 }

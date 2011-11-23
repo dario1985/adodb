@@ -13,6 +13,10 @@ use ADOdb\FieldObject as ADODB_FieldObject;
 class Statement extends \PDOStatement
                 implements \ADOdb\Statement
 {
+    const FETCH_NUM = Driver::FETCH_NUM;
+    const FETCH_ASSOC = Driver::FETCH_ASSOC;
+    const FETCH_BOTH = Driver::FETCH_BOTH;
+    
     protected $createdTime;
     
     protected function __construct()
@@ -22,7 +26,7 @@ class Statement extends \PDOStatement
     
     public function createdTime()
     {
-        return $this->createdTime();
+        return $this->createdTime;
     }
     
     public function canSeek()
@@ -37,7 +41,7 @@ class Statement extends \PDOStatement
     
     public function getColumnMeta($column_number = 0)
     {
-        $pdo_metas = $this->getColumnMeta($column_number);
+        $pdo_metas = parent::getColumnMeta($column_number);
         $field = new ADODB_FieldObject();
         $field->_setDataInfo(array(
             'name' => $pdo_metas['name'],

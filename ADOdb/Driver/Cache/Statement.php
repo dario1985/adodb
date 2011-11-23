@@ -12,48 +12,54 @@ use ADOdb\FieldObject as ADODB_FieldObject;
 
 class Statement implements \ADOdb\Statement
 {
+    const FETCH_NORMAL = self::FETCH_ASSOC;
+    const FETCH_NUM = 1;
+    const FETCH_ASSOC = 2;
+    const FETCH_BOTH = 3;
+    
     protected $resultsetData;
+    protected $rowCount;
     protected $columnMeta;
+    protected $columnMap;
 
     protected $lastErrorCode;
     protected $lastErrorInfo;
     protected $currentRow;
-
     protected $createdTime;
+    protected $fetchMode = self::FETCH_NORMAL;
 
-    protected function __construct(array $data = null)
+    public function __construct(array $data = null)
     {
-        $this->createdTime = time();
         if (isset($data['COLUMN_META']) && isset($data['RESULTSET'])) {
             $this->columnMeta = $data['COLUMN_META'];
-            $this->buildResultsetData($data['RESULTSET']);
+            $this->initResultsetData($data['RESULTSET']);
             if (isset($data['CREATED'])) {
                 $this->createdTime = (int) $data['CREATED'];
             }
+            $this->rowCount = count($this->resultsetData);
+            $this->currentRow = 0;
         } else {
             throw new InvalidArgumentException('Invalid data');
         }
     }
 
-    protected function buildResultsetData(array $resultsetRawData)
+    protected function initResultsetData(array $resultsetRawData)
     {
-        $this->resultsetData = $colNames = array();
+        $this->columnMap = array();
+        $this->resultsetData = $resultsetRawData;
         foreach ($this->columnMeta as $c) {
-            $colNames[] = $c['name'];
-        }
-        foreach ($resultsetRawData as $record) {
-            $this->resultsetData[] = array_combine($colNames, $record);
+            $this->columnMap[] = $c->name;
         }
     }
-
-    protected function __destruct()
+    
+    public function __destruct()
     {
         $this->data = null;
     }
 
     public function createdTime()
     {
-        return $this->createdTime();
+        return $this->createdTime;
     }
 
     public function canSeek()
@@ -88,7 +94,7 @@ class Statement implements \ADOdb\Statement
 
     public function rowCount()
     {
-        return count($this->resultsetData);
+        return $this->rowCount;
     }
 
     public function fetch($offset = null)
@@ -96,17 +102,56 @@ class Statement implements \ADOdb\Statement
         if ($offset === null) {
             $offset = $this->currentRow++;
         }
-        return $this->resultsetData[$offset];
+        
+        if ($this->currentRow < $this->rowCount) {
+            if ($this->fetchMode & self::FETCH_ASSOC) {
+                if ($this->fetchMode & self::FETCH_NUM) {
+                    return array_merge(
+                        $this->resultsetData[$offset],
+                        array_combine(
+                            $this->columnMap, 
+                            $this->resultsetData[$offset]
+                        )
+                    );
+                } else {
+                    return array_combine(
+                        $this->columnMap, 
+                        $this->resultsetData[$offset]
+                    );
+                }
+            } else {
+                return $this->resultsetData[$offset];
+            }
+        } else return false;
     }
 
-    public function fetchAll()
+    public function fetchAll($fetch_style = null)
     {
-        return $this->resultsetData;
+        $fetch_style = $fetch_style !== null ? $fetch_style : $this->fetchMode;
+        
+        if ($this->fetchMode & self::FETCH_ASSOC) {
+            $data = array();
+            if ($this->fetchMode & self::FETCH_NUM) {
+                foreach ($this->resultsetData as $row)
+                    $data[] = array_merge(
+                        $row, 
+                        array_combine($this->columnMap, $row)
+                    );
+            } else {
+                foreach ($this->resultsetData as $row)
+                    $data[] = array_combine($this->columnMap, $row);
+            }
+            return $data;
+        } else {
+            return $this->resultsetData;
+        }
     }
 
     public function fetchColumn($column_number = 0)
     {
-        return $this->resultsetData[$this->currentRow++][$column_number];
+        if ($this->currentRow < $this->rowCount) {
+            return $this->resultsetData[$this->currentRow++][$column_number];
+        } else return false;
     }
 
     public function getColumnMeta($column_number = 0)
@@ -114,5 +159,10 @@ class Statement implements \ADOdb\Statement
         $field = new ADODB_FieldObject();
         $field->_setDataInfo($this->columnMeta[$column_number]);
         return $field;
+    }
+    
+    public function setFetchMode($mode)
+    {
+        $this->fetchMode = $mode;
     }
 }
