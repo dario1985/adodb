@@ -23,10 +23,9 @@ class File extends \ADOdb\Cache
 
     public function read($key, $ttl)
     {
-        $dirname = $this->getDirName($key);
-        $file = $dirname . $key . '.cache';
+        $file = $this->getCacheFile($key);
         if (file_exists($file)) {
-            $st = unserialize(file_get_contents($file));
+            $st = $this->unserializeStatement(file_get_contents($file));
             if ($st instanceof \ADOdb\Statement) {
                 if ((time() - $st->getCreateTime()) > $ttl) {
                     $this->flush($key);
@@ -43,15 +42,15 @@ class File extends \ADOdb\Cache
     public function write($key, \ADOdb\Statement $value, $ttl)
     {
         $dirname = $this->getDirName($key);
-
         if (!file_exists($dirname)) {
             mkdir($dirname, $this->chmod, true);
         }
 
         if ($this->isValidPath($dirname)) {
-            $data = serialize($value);
-            if (file_put_contents($dirname . $key . '.cache', $data, LOCK_EX)) {
-                chmod($dirname . $key, $data, $this->chmod);
+            $data = $this->serializeStatement($value);
+            $file = $this->getCacheFile($key);
+            if (file_put_contents($file, $data, LOCK_EX)) {
+                chmod($file, $data, $this->chmod);
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache File: Cannot write into file');
             }
@@ -60,9 +59,9 @@ class File extends \ADOdb\Cache
 
     public function flush($key)
     {
-        $dirname = $this->getDirName($key);
+        $file = $this->getCacheFile($key);
 
-        if (file_exists($dirname . $key) && !unlink($dirname . $key)) {
+        if (file_exists($file) && !unlink($file)) {
             throw new \ADOdb\Exception('ADOdb Cache File: Cannot flush cache');
         }
 
@@ -96,6 +95,11 @@ class File extends \ADOdb\Cache
         } else {
             return true;
         }
+    }
+
+    protected function getCacheFile($key)
+    {
+        return $this->getDirName() . $key . '.cache';
     }
 
     protected function getDirName($key)

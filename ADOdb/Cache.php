@@ -10,13 +10,13 @@ namespace ADOdb;
 
 use ADOdb\Driver\Cache as DriverCache;
 
-abstract class Cache implements DriverCache
+class Cache
 {
     const TYPE_FILE = 1;
 
-    public function getQueryKey($sql, $params = null)
+    public static function getQueryId($sql, array $params = null)
     {
-        if ($params) {
+        if ($params !== null) {
             return md5($sql.implode('', $params));
         } else {
             return md5($sql);
@@ -30,6 +30,26 @@ abstract class Cache implements DriverCache
             default:
                 $cache = new Driver\Cache\File();
                 return $cache;
+        }
+    }
+
+    public static function serializeStatement(Statement $statement)
+    {
+        $RESULTSET = $statement->fetchAll($statement::FETCH_NUM);
+        $COLUMN_META = array();
+        for ($col = 0; $nCols = $statement->columnCount(); $i < $nCols; $i++) {
+            $COLUMN_META[] = $statement->getColumnMeta($i);
+        }
+        $CREATED = $statement->getCreatedTime();
+        return serialize(compact('RESULTSET', 'COLUMN_META', 'CREATED'));
+    }
+
+    public static function unserializeStatement($serializedStatement)
+    {
+        if ($rawSt = unserialize($serializedStatement)) {
+            return new Driver\Array\Statement($rawSt);
+        } else {
+            throw new Exception('Unserialize error');
         }
     }
 }
