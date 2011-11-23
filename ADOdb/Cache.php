@@ -37,7 +37,7 @@ class Cache
     {
         $RESULTSET = $statement->fetchAll($statement::FETCH_NUM);
         $COLUMN_META = array();
-        for ($col = 0; $nCols = $statement->columnCount(); $i < $nCols; $i++) {
+        for ($col = 0, $nCols = $statement->columnCount(); $i < $nCols; $i++) {
             $COLUMN_META[] = $statement->getColumnMeta($i);
         }
         $CREATED = $statement->getCreatedTime();
@@ -47,7 +47,7 @@ class Cache
     public static function unserializeStatement($serializedStatement)
     {
         if ($rawSt = unserialize($serializedStatement)) {
-            return new Driver\Array\Statement($rawSt);
+            return new Driver\Cache\Statement($rawSt);
         } else {
             throw new Exception('Unserialize error');
         }

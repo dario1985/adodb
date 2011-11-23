@@ -21,7 +21,7 @@ class Connection
     const FETCH_BOTH = 3;
 
     protected $dso;
-    
+
     /**
      * @var Driver
      */
@@ -50,7 +50,7 @@ class Connection
     }
 
     /**
-     * Close connection 
+     * Close connection
      */
     public function close()
     {
@@ -106,34 +106,34 @@ class Connection
     {
         $this->cache = $cache;
     }
-    
+
     public function hasCache()
     {
         return ($this->cache !== null);
     }
-    
+
     protected function getCache()
     {
         return $this->cache;
     }
-    
+
     /**
      * Start new transaction
-     * 
-     * @return type 
+     *
+     * @return type
      */
-    public function startTrans() 
+    public function startTrans()
     {
         if (!$this->connection->inTransaction()) {
             return $this->connection->beginTransaction();
         } else return false;
     }
-    
+
     /**
      * Complete transaction
-     * 
+     *
      * @param type $success
-     * @return boolean 
+     * @return boolean
      */
     public function completeTrans($success = true)
     {
@@ -146,13 +146,13 @@ class Connection
             $this->connection->rollBack();
         }
     }
-    
+
     /**
      * GetRow: return array of value of first row
-     * 
+     *
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
-     * @return array 
+     * @return array
      */
     public function getRow($statement, $vars = null)
     {
@@ -162,11 +162,11 @@ class Connection
 
     /**
      * CacheGetRow: cached GetRow
-     * 
+     *
      * @param int $timeout count of seconds for cache expiry
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
-     * @return array 
+     * @return array
      */
     public function cacheGetRow($timeout, $statement, $vars = null)
     {
@@ -176,10 +176,10 @@ class Connection
 
     /**
      * GetOne: return first value of first row
-     * 
+     *
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
-     * @return mixed 
+     * @return mixed
      */
     public function getOne($statement, $vars = null)
     {
@@ -189,11 +189,11 @@ class Connection
 
     /**
      * CacheGetOne: cached GetOne
-     * 
+     *
      * @param int $timeout count of seconds for cache expiry
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
-     * @return mixed 
+     * @return mixed
      */
     public function cacheGetOne($timeout, $statement, $vars = null)
     {
@@ -203,10 +203,10 @@ class Connection
 
     /**
      * GetCol: return array of value of first column
-     * 
+     *
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
-     * @return array 
+     * @return array
      */
     public function getCol($statement, $vars = null)
     {
@@ -223,7 +223,7 @@ class Connection
      * @param int $timeout count of seconds for cache expiry
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
-     * @return array 
+     * @return array
      */
     public function cacheGetCol($timeout, $statement, $vars = null)
     {
@@ -237,7 +237,7 @@ class Connection
 
     /**
      * GetAll: return array of results
-     * 
+     *
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
      * @return array Array of results
@@ -250,7 +250,7 @@ class Connection
 
     /**
      * CacheGetAll: cached GetAll
-     * 
+     *
      * @param int $timeout count of seconds for cache expiry
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
@@ -264,7 +264,7 @@ class Connection
 
     /**
      * CacheExecute
-     * 
+     *
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
      * @return ResultSet|false object or false if fail
@@ -280,7 +280,7 @@ class Connection
 
     /**
      * CacheExecute: cached Execute
-     * 
+     *
      * @param int $timeout count of seconds for cache expiry
      * @param string $statement String query to execute
      * @param array $vars Array of variables to bind [optional]
@@ -303,9 +303,9 @@ class Connection
     }
 
     /**
-     * @param int $fetchMode 
+     * @param int $fetchMode
      * @return type
-     * @throws ConnectionException 
+     * @throws ConnectionException
      */
     public function setFetchMode($fetchMode)
     {
@@ -329,7 +329,7 @@ class Connection
     /**
      * @param string $statement query statement
      * @param array $vars [optional]
-     * @return Statement object 
+     * @return Statement object
      */
     protected function query($statement, $vars = null)
     {
@@ -341,7 +341,7 @@ class Connection
      * @param string $statement query statement
      * @param array $vars [optional]
      * @return Statement object
-     * @throws ConnectionException 
+     * @throws ConnectionException
      */
     protected function cacheQuery($timeout, $statement, $vars = null)
     {
@@ -349,7 +349,7 @@ class Connection
             $st = null;
             try {
                 $cache = $this->getCache();
-                $queryKey = $cache->getQueryKey($statement, $vars);
+                $queryKey = $cache->getQueryId($statement, $vars);
                 $st = $cache->read($queryKey, $timeout);
             } catch (\Exception $e) {
                 // To log debug info
