@@ -18,9 +18,9 @@ class Cache
     public static function getQueryId($sql, array $params = null)
     {
         if ($params !== null) {
-            return md5($sql.implode('', $params));
+            return 'DB_' . md5($sql.implode('', $params));
         } else {
-            return md5($sql);
+            return 'DB_' . md5($sql);
         }
     }
 

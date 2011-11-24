@@ -26,7 +26,7 @@ class Statement implements \ADOdb\Statement
     protected $lastErrorInfo;
     protected $currentRow;
     protected $createdTime;
-    protected $fetchMode = self::FETCH_NORMAL;
+    protected $fetchMode = self::FETCH_ASSOC;
 
     public function __construct(array $data = null)
     {
@@ -103,24 +103,18 @@ class Statement implements \ADOdb\Statement
             $offset = $this->currentRow++;
         }
         
-        if ($this->currentRow < $this->rowCount) {
+        if ($offset < $this->rowCount) {
+            $row = $this->resultsetData[$offset];
             if ($this->fetchMode & self::FETCH_ASSOC) {
                 if ($this->fetchMode & self::FETCH_NUM) {
                     return array_merge(
-                        $this->resultsetData[$offset],
-                        array_combine(
-                            $this->columnMap, 
-                            $this->resultsetData[$offset]
-                        )
+                        $row, array_combine($this->columnMap, $row)
                     );
                 } else {
-                    return array_combine(
-                        $this->columnMap, 
-                        $this->resultsetData[$offset]
-                    );
+                    return array_combine($this->columnMap, $row);
                 }
             } else {
-                return $this->resultsetData[$offset];
+                return $row;
             }
         } else return false;
     }

@@ -3,8 +3,7 @@
 require 'config.php';
 
 $db = NewADOConnection('mysql');
-$cache = ADOdb\Cache::create(ADOdb\Cache::TYPE_APC);
-/*$cache->setCacheDir('/tmp/adodb/');*/
+$cache = ADOdb\Cache::create(ADOdb\Cache::TYPE_FILE);
 $db->setCache($cache);
 $db->Connect(TEST_PDO_HOSTNAME, TEST_PDO_USERNAME, TEST_PDO_PASSWORD);
 

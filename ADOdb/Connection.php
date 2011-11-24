@@ -349,15 +349,15 @@ class Connection
             $st = null;
             try {
                 $cache = $this->getCache();
-                $queryKey = $cache->getQueryId($statement, $vars);
-                $st = $cache->read($queryKey, $timeout);
+                $queryId = $cache->getQueryId($statement, $vars);
+                $st = $cache->read($queryId, $timeout);
             } catch (\Exception $e) {
                 // To log debug info
             }
             if (!$st) {
                 // Cache miss
                 $st = $this->connection->query($statement, $vars);
-                $cache->write($queryKey, $st, $timeout);
+                $cache->write($queryId, $st, $timeout);
             }
             return $st;
         } else {

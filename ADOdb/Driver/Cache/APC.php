@@ -37,7 +37,7 @@ class APC extends \ADOdb\Cache implements \ADOdb\Driver\Cache
     public function write($key, \ADOdb\Statement $value, $ttl)
     {
         if (apc_store($key, $this->serializeStatement($value), $ttl) === false) {
-            throw new \ADOdb\Exception('ADOdb Cache APC: Cannot store value');
+            throw new \ADOdb\Exception('ADOdb Cache APC: Cannot store value. Is APC enabled?');
         } else return true;
     }
     
