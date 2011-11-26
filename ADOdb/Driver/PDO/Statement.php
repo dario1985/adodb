@@ -17,16 +17,16 @@ class Statement extends \PDOStatement
     const FETCH_ASSOC = Driver::FETCH_ASSOC;
     const FETCH_BOTH = Driver::FETCH_BOTH;
     
-    protected $createdTime;
+    protected $timeCreated;
     
     protected function __construct()
     {
-        $this->createdTime = time();
+        $this->timeCreated = time();
     }
     
-    public function createdTime()
+    public function timeCreated()
     {
-        return $this->createdTime;
+        return $this->timeCreated;
     }
     
     public function canSeek()
@@ -39,15 +39,37 @@ class Statement extends \PDOStatement
         return $this->closeCursor();
     }
     
+    public function inTransaction()
+    {
+        return parent::inTransaction();
+    }
+    
     public function getColumnMeta($column_number = 0)
     {
         $pdo_metas = parent::getColumnMeta($column_number);
-        $field = new ADODB_FieldObject();
-        $field->_setDataInfo(array(
-            'name' => $pdo_metas['name'],
-            'max_length' => $pdo_metas['len'],
-            'type' => $pdo_metas['native_type'],
-        ));
-        return $field;
+        return new ADODB_FieldObject(
+                array(
+                    'name' => $pdo_metas['name'],
+                    'max_length' => $pdo_metas['len'],
+                    'type' => $pdo_metas['native_type']
+                ));
+    }
+    
+    public function dump()
+    {
+        $metas = array();
+        for ($col = 0, $nCols = $this->columnCount(); $col < $nCols; $col++) {
+            $pdo_metas = parent::getColumnMeta($col);
+            $metas[] = array(
+                'name' => $pdo_metas['name'],
+                'max_length' => $pdo_metas['len'],
+                'type' => $pdo_metas['native_type']
+            );
+        }
+        return array(
+            'RESULTSET' => $this->fetchAll(self::FETCH_NUM), 
+            'COLUMN_META' => $metas, 
+            'CREATED' => $this->timeCreated
+        );
     }
 }

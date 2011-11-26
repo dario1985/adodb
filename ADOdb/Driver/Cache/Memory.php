@@ -8,22 +8,19 @@
 
 namespace ADOdb\Driver\Cache;
 
-class APC extends \ADOdb\Cache implements \ADOdb\Driver\Cache
+class Memory extends \ADOdb\Cache implements \ADOdb\Driver\Cache
 {
+    protected $_cache;
+    
     public function __construct()
     {
-        if (!extension_loaded('apc')) {
-            throw new \ADOdb\Exception('ADOdb Cache: APC Extension not loaded');
-        }
-        if (PHP_SAPI === 'cli') {
-            user_error('APC Cache will don\'t persist between CLI executions.', E_USER_NOTICE);
-        }
+        $this->_cache = array();
     }
     
     public function read($key, $ttl)
     {
-        if ($val = apc_fetch($key)) {
-            $st = $this->unserializeStatement($val);
+        if (isset($this->_cache[$key])) {
+            $st = $this->unserializeStatement($this->_cache[$key]);
             if ($st instanceof \ADOdb\Statement) {
                 if ((time() - $st->timeCreated()) > $ttl) {
                     $this->flush($key);
@@ -32,25 +29,23 @@ class APC extends \ADOdb\Cache implements \ADOdb\Driver\Cache
                     return $st;
                 }
             } else {
-                throw new \ADOdb\Exception('ADOdb Cache APC: Cache is corrupted');
+                throw new \ADOdb\Exception('ADOdb Cache RedisLib: Cache is corrupted');
             }
         } else return false;        
     }
     
     public function write($key, \ADOdb\Statement $value, $ttl)
     {
-        if (apc_store($key, $this->serializeStatement($value), $ttl) === false) {
-            throw new \ADOdb\Exception('ADOdb Cache APC: Cannot store value. Is APC enabled?');
-        } else return true;
+        $this->_cache[$key] = $this->serializeStatement($value);
     }
     
     public function flush($key)
     {
-        return apc_delete($key);
+        unset($this->_cache[$key]);
     }
     
     public function flushAll()
     {
-        return apc_clear_cache('user');
+        $this->_cache = array();
     }
 }

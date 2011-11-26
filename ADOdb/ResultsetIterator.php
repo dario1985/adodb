@@ -10,15 +10,42 @@ namespace ADOdb;
 
 /**
  * ResultsetIterator
+ * 
+ * Implementing 
  */
-class ResultsetIterator implements \Iterator
+class ResultsetIterator implements \SeekableIterator
 {
+    /**
+     * ResultSet Object
+     * @var ResultSet
+     */
     protected $rs;
 
     public function __construct(ResultSet $rs)
     {
         $this->rs = $rs;
     }
+
+    public function seek($position)
+    {
+        $this->rs->move($position);
+    }
+    
+    public function current()
+    {
+        return $this->rs->fields;
+    }
+
+    public function key()
+    {
+        return $this->rs->currentRow;
+    }
+
+    public function next()
+    {
+        $this->rs->moveNext();
+    }
+
 
     public function rewind()
     {
@@ -29,29 +56,9 @@ class ResultsetIterator implements \Iterator
     {
         return !$this->rs->EOF;
     }
-
-    public function key()
-    {
-        return $this->rs->currentRow();
-    }
-
-    public function current()
-    {
-        return $this->rs->fields;
-    }
-
-    public function next()
-    {
-        $this->rs->moveNext();
-    }
-
+    
     public function __call($func, $params)
     {
         return call_user_func_array(array($this->rs, $func), $params);
-    }
-
-    public function hasMore()
-    {
-        return!$this->rs->EOF;
     }
 }

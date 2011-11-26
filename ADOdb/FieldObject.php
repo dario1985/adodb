@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright 2011 (c) Dario Mancuso
  *
@@ -31,10 +30,24 @@ class FieldObject
         $this->$name = $value;
     }
     
-    public function _setDataInfo(array $fieldMetaData)
+    public function __construct($fieldMetaData = null)
     {
-        foreach ($fieldMetaData as $attr => $value) {
-            $this->$attr = $value;
+        if ($fieldMetaData) {
+            foreach ($fieldMetaData as $attr => $value) {
+                $this->$attr = $value;
+            }
         }
+    }
+    
+    public function __toArray()
+    {
+        return array(
+                    'name' => $this->name,
+                    'max_length' => $this->max_length,
+                    'type' => $this->type,
+                    'not_null' => $this->not_null,
+                    'has_default' => $this->has_default,
+                    'default_value' => $this->default_value 
+                );
     }
 }

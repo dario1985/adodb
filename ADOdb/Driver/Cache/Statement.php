@@ -25,7 +25,7 @@ class Statement implements \ADOdb\Statement
     protected $lastErrorCode;
     protected $lastErrorInfo;
     protected $currentRow;
-    protected $createdTime;
+    protected $timeCreated;
     protected $fetchMode = self::FETCH_ASSOC;
 
     public function __construct(array $data = null)
@@ -34,7 +34,7 @@ class Statement implements \ADOdb\Statement
             $this->columnMeta = $data['COLUMN_META'];
             $this->initResultsetData($data['RESULTSET']);
             if (isset($data['CREATED'])) {
-                $this->createdTime = (int) $data['CREATED'];
+                $this->timeCreated = (int) $data['CREATED'];
             }
             $this->rowCount = count($this->resultsetData);
             $this->currentRow = 0;
@@ -48,18 +48,18 @@ class Statement implements \ADOdb\Statement
         $this->columnMap = array();
         $this->resultsetData = $resultsetRawData;
         foreach ($this->columnMeta as $c) {
-            $this->columnMap[] = $c->name;
+            $this->columnMap[] = $c['name'];
         }
     }
     
     public function __destruct()
     {
-        $this->data = null;
+        $this->data = $this->columnMap = $this->columnMeta = null;
     }
 
-    public function createdTime()
+    public function timeCreated()
     {
-        return $this->createdTime;
+        return $this->timeCreated;
     }
 
     public function canSeek()
@@ -150,13 +150,16 @@ class Statement implements \ADOdb\Statement
 
     public function getColumnMeta($column_number = 0)
     {
-        $field = new ADODB_FieldObject();
-        $field->_setDataInfo($this->columnMeta[$column_number]);
-        return $field;
+        return new ADODB_FieldObject($this->columnMeta[$column_number]);
     }
     
     public function setFetchMode($mode)
     {
         $this->fetchMode = $mode;
+    }
+    
+    public function dump()
+    {
+        throw new \RuntimeException('Cannot dump a cached statement');
     }
 }

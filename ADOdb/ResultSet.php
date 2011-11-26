@@ -12,23 +12,34 @@ namespace ADOdb;
 /**
  * Resultset Class
  */
-class ResultSet implements \Serializable, 
+class ResultSet implements \Countable, 
                            \IteratorAggregate
 {
 
+    /**
+     * Cache Driver
+     * @var Cache
+     */
     protected $cache = null;
+    
+    /**
+     * Statement object
+     * @var Statement
+     */
     protected $statement = null;
 
-    /* Publically accessible row values */
+    /* Publically accessible  __get() attributes: see $publicProperties */
     protected $fields = false;
     protected $timeCreated;
     protected $EOF = false;
     protected $numOfRows = null;
     protected $numOfFields = null;
+    
     protected $bufferedResults = null;
     
     protected $publicProperties = array(
         'timeCreated' => 1,
+        'numOfFields' => 1,
         'numOfRows' => 1,
         'fields' => 1,
         'EOF' => 1
@@ -36,17 +47,18 @@ class ResultSet implements \Serializable,
 
     public function __construct(Statement $statement)
     {
-        $this->timeCreated = time();
         $this->statement = $statement;
+        $this->timeCreated = $statement->timeCreated();
         $this->canSeek = $statement->canSeek();
+        $this->numOfRows = $statement->rowCount();
+        $this->numOfFields = $statement->columnCount();
         $this->currentRow = -1;
-        $this->numOfRows = $this->recordCount();
         $this->moveNext();
     }
 
     public function __destruct()
     {
-        if ($this->statement) {
+        if ($this->statement !== null) {
             $this->statement->close();
             $this->statement = null;
         }
@@ -60,23 +72,11 @@ class ResultSet implements \Serializable,
     }
 
     /**
-     * Interface
-     * @return RecordsetIterator
-     */
-    public function getIterator()
-    {
-        return new ResultsetIterator($this);
-    }
-
-    /**
      * RecordCount: Retrieve number of records in this RS
      * @return Integer number of records
      */
     public function recordCount()
     {
-        if ($this->numOfRows === null) {
-            $this->numOfRows = $this->statement->rowCount();
-        }
         return $this->numOfRows;
     }
 
@@ -98,37 +98,28 @@ class ResultSet implements \Serializable,
      * Move to the first row in the recordset.
      * Many databases do NOT support this.
      *
-     * @return true or false
+     * @return boolean
      */
     public function moveFirst()
     {
-        if ($this->currentRow === 0)
+        if ($this->currentRow === 0) {
             return true;
-        return $this->Move(0);
+        }
+        return $this->move(0);
     }
 
     /**
      * Move to the last row in the recordset.
      *
-     * @return true or false
+     * @return boolean
      */
     public function moveLast()
     {
         if ($this->numOfRows > 0)
-            return $this->Move($this->numOfRows - 2);
+            return $this->move($this->numOfRows - 2);
 
         if ($this->EOF)
             return false;
-        /* Compat?
-
-          while (!$this->EOF) {
-          $f = $this->fields;
-          $this->MoveNext();
-          }
-          $this->fields = $f;
-          $this->EOF = false;
-          return true;
-         */
     }
 
     /**
@@ -136,19 +127,16 @@ class ResultSet implements \Serializable,
      */
     public function moveNext()
     {
-        if (!$this->EOF) {
-            if ($this->numOfRows > ++$this->currentRow) {
-                if ($this->bufferedResults === null) {
-                    $this->fields = $this->statement->fetch();
-                } else {
-                    $this->fields = $this->bufferedResults[$this->currentRow];
-                }
-                return true;
+        if (!$this->EOF && $this->numOfRows > ++$this->currentRow) {
+            if ($this->bufferedResults === null) {
+                $this->fields = $this->statement->fetch();
             } else {
-                $this->fields = false;
-                $this->EOF = true;
+                $this->fields = $this->bufferedResults[$this->currentRow];
             }
+            return true;
         } else {
+            $this->fields = false;
+            $this->EOF = true;
             return false;
         }
     }
@@ -203,7 +191,7 @@ class ResultSet implements \Serializable,
      *
      * @return the value of $colname column
      */
-    public function Fields($colname)
+    public function fields($colname)
     {
         return $this->fields[$colname];
     }
@@ -227,7 +215,7 @@ class ResultSet implements \Serializable,
         if ($field !== false) {
             return $field;
         } else {
-            throw new \Exception('Driver don\' support Column Meta Data');
+            throw new \Exception('Driver don\'t support Column Meta Data');
         }
     }
 
@@ -239,25 +227,32 @@ class ResultSet implements \Serializable,
      */
     public function fieldCount()
     {
-        if ($this->numOfFields === null) {
-            $this->numOfFields = $this->statement->columnCount();
-        }
         return $this->numOfFields;
     }
-
-    /**
-     * Serialize
+    
+    /*
+     * IteratorAggregate Interface
      */
-    public function serialize()
+    
+    /**
+     * Return ResultSetIterator
+     * @return RecordsetIterator
+     */
+    public function getIterator()
     {
-        return serialize($this);
+        return new ResultsetIterator($this);
     }
-
-    /**
-     * Unserialize
+    
+    /*
+     * Countable Interface
      */
-    public function unserialize($data)
+    
+    /**
+     * Return RecordCount
+     * @return int Row Count
+     */
+    public function count()
     {
-        return unserialize($data);
+        return $this->numOfRows;
     }
 }

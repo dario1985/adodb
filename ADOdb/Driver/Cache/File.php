@@ -27,7 +27,7 @@ class File extends \ADOdb\Cache implements \ADOdb\Driver\Cache
         if (file_exists($file)) {
             $st = $this->unserializeStatement(file_get_contents($file));
             if ($st instanceof \ADOdb\Statement) {
-                if ((time() - $st->createdTime()) > $ttl) {
+                if ((time() - $st->timeCreated()) > $ttl) {
                     $this->flush($key);
                     return false;
                 } else {

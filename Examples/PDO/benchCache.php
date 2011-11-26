@@ -1,9 +1,38 @@
 <?php
+/*
+ * Copyright 2011 (c) Dario Mancuso
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
 require 'config.php';
 
+use ADOdb\Cache as ADODB_Cache;
+
+/* Parsing CLI options */
+$cli_options = getopt('', array('cache::'));
+switch ($cli_options['cache']) {
+    case 'memory':
+        echo "=== Using MEMORY as cache ===\n";
+        $cache = ADODB_Cache::create(ADODB_Cache::TYPE_MEMORY);
+        break;
+    case 'apc':
+        echo "=== Using APC as cache ===\n";
+        $cache = ADODB_Cache::create(ADODB_Cache::TYPE_APC);
+        break;
+    case 'libredis':
+        echo "=== Using LIBREDIS as cache ===\n";
+        $cache = ADODB_Cache::create(ADODB_Cache::TYPE_LIBREDIS);
+        $cache->connect('localhost');
+        break;
+    case 'file':
+    default:
+        echo "=== Using FILE as cache ===\n";
+        $cache = ADODB_Cache::create(ADODB_Cache::TYPE_FILE);
+}
+
 $db = NewADOConnection('mysql');
-$cache = ADOdb\Cache::create(ADOdb\Cache::TYPE_FILE);
 $db->setCache($cache);
 $db->Connect(TEST_PDO_HOSTNAME, TEST_PDO_USERNAME, TEST_PDO_PASSWORD);
 
@@ -12,15 +41,6 @@ $sql = "SELECT SQL_NO_CACHE * FROM test.bench LIMIT 100000";
 $ttotal0 = microtime(true);
 
 goto RS_CLASSIC;
-
-POPULATE:
-for($i=0; $i<1e6; $i++) {
-    $insert = sprintf('INSERT INTO test.bench VALUES (null, %d, "%s");',
-        rand(1e3,9e6), md5(time())); 
-    //echo $insert;
-    $db->execute($insert);
-}
-die('POPULATED!');
 
 RS_CLASSIC:
 /* ResultSet access */
@@ -31,8 +51,7 @@ while (!$rs->EOF) {
     $rs->MoveNext();
 }
 w('RS_CLASSIC', $t0);
-$rs = null;
-$tmp = null;
+$rs = $tmp = null;
 
 RS_ITERATOR:
 $t0 = microtime(true);
@@ -41,8 +60,7 @@ foreach ($rs as $c => $row){
     $tmp = $row;
 }
 w('RS_ITERATOR', $t0);
-$rs = null;
-$tmp = null;
+$rs = $tmp = null;
 
 
 GETALL:
@@ -74,4 +92,7 @@ $t = round(microtime(true) - $ttotal0, 3);
 echo "=== Time: {$t}s\n";
 $mem = round(memory_get_peak_usage()/1024/1024,3);
 echo "=== Max memory peak: {$mem}M\n";
+
+$cache->flushAll();
+echo "=== Cache flushed!\n";
 

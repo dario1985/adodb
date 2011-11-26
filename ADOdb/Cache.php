@@ -12,23 +12,31 @@ use ADOdb\Driver\Cache as DriverCache;
 
 class Cache
 {
+    const TYPE_MEMORY = 0;
     const TYPE_FILE = 1;
     const TYPE_APC = 2;
+    const TYPE_LIBREDIS = 3;
 
+    const KEY_PREFIX = 'DB_';
+    
     public static function getQueryId($sql, array $params = null)
     {
         if ($params !== null) {
-            return 'DB_' . md5($sql.implode('', $params));
+            return self::KEY_PREFIX . md5($sql . implode('', $params));
         } else {
-            return 'DB_' . md5($sql);
+            return self::KEY_PREFIX . md5($sql);
         }
     }
 
-    public static function create($type = self::TYPE_FILE)
+    public static function create($type = self::TYPE_MEMORY)
     {
         switch ($type) {
+            case self::TYPE_MEMORY:
+                return new Driver\Cache\Memory();
             case self::TYPE_APC:
                 return new Driver\Cache\APC();
+            case self::TYPE_LIBREDIS:
+                return new Driver\Cache\Libredis();
             case self::TYPE_FILE:
             default:
                 return new Driver\Cache\File();
@@ -37,19 +45,13 @@ class Cache
 
     public static function serializeStatement(Statement $statement)
     {
-        $RESULTSET = $statement->fetchAll($statement::FETCH_NUM);
-        $COLUMN_META = array();
-        for ($i = 0, $nCols = $statement->columnCount(); $i < $nCols; $i++) {
-            $COLUMN_META[] = $statement->getColumnMeta($i);
-        }
-        $CREATED = $statement->createdTime();
-        return serialize(compact('RESULTSET', 'COLUMN_META', 'CREATED'));
+        return gzcompress(serialize($statement->dump()), 3);
     }
 
     public static function unserializeStatement($serializedStatement)
     {
-        $rawSt = unserialize($serializedStatement);
-        if ($rawSt !== null) {
+        $rawSt = unserialize(gzuncompress($serializedStatement));
+        if ($rawSt !== false) {
             return new Driver\Cache\Statement($rawSt);
         } else {
             throw new Exception('Unserialize error');

@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright 2011 (c) Dario Mancuso
  *
@@ -9,9 +8,6 @@
 
 namespace ADOdb;
 
-/**
- * Connection
- */
 class Connection
 {
 
@@ -32,7 +28,8 @@ class Connection
     protected $database;
     protected $fetchMode;
     protected $attributes = array();
-
+    protected $debug = false;
+    
     public function __construct($dsn = '')
     {
         $dso = new DataSource($dsn);
@@ -89,6 +86,11 @@ class Connection
         return true;
     }
 
+    public function setDebug($flag)
+    {
+        $this->debug = (bool) $flag;
+    }
+    
     protected function setAttribute($name, $value)
     {
         if ($this->connection) {
@@ -105,16 +107,6 @@ class Connection
     public function setCache(Cache $cache)
     {
         $this->cache = $cache;
-    }
-
-    public function hasCache()
-    {
-        return ($this->cache !== null);
-    }
-
-    protected function getCache()
-    {
-        return $this->cache;
     }
 
     /**
@@ -154,7 +146,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return array
      */
-    public function getRow($statement, $vars = null)
+    public function getRow($statement, array $vars = null)
     {
         $statement = $this->query($statement, $vars);
         return $statement->fetch(0);
@@ -168,7 +160,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return array
      */
-    public function cacheGetRow($timeout, $statement, $vars = null)
+    public function cacheGetRow($timeout, $statement, array $vars = null)
     {
         $statement = $this->cacheQuery($timeout, $statement, $vars);
         return $statement->fetch(0);
@@ -181,7 +173,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return mixed
      */
-    public function getOne($statement, $vars = null)
+    public function getOne($statement, array $vars = null)
     {
         $statement = $this->query($statement, $vars);
         return $statement->fetchColumn(0);
@@ -195,7 +187,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return mixed
      */
-    public function cacheGetOne($timeout, $statement, $vars = null)
+    public function cacheGetOne($timeout, $statement, array $vars = null)
     {
         $statement = $this->cacheQuery($timeout, $statement, $vars);
         return $statement->fetchColumn(0);
@@ -208,7 +200,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return array
      */
-    public function getCol($statement, $vars = null)
+    public function getCol($statement, array $vars = null)
     {
         $statement = $this->query($statement, $vars);
         $col = array();
@@ -225,7 +217,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return array
      */
-    public function cacheGetCol($timeout, $statement, $vars = null)
+    public function cacheGetCol($timeout, $statement, array $vars = null)
     {
         $statement = $this->cacheQuery($timeout, $statement, $vars);
         $col = array();
@@ -242,7 +234,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return array Array of results
      */
-    public function getAll($statement, $vars = null)
+    public function getAll($statement, array $vars = null)
     {
         $statement = $this->query($statement, $vars);
         return $statement->fetchAll();
@@ -256,7 +248,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return array Array of results
      */
-    public function cacheGetAll($timeout, $statement, $vars = null)
+    public function cacheGetAll($timeout, $statement, array $vars = null)
     {
         $statement = $this->cacheQuery($timeout, $statement, $vars);
         return $statement->fetchAll();
@@ -286,7 +278,7 @@ class Connection
      * @param array $vars Array of variables to bind [optional]
      * @return ResultSet|null object or false if fail
      */
-    public function cacheExecute($timeout, $statement, $vars = null)
+    public function cacheExecute($timeout, $statement, array $vars = null)
     {
         return new ResultSet($this->cacheQuery($timeout, $statement, $vars));
     }
@@ -331,7 +323,7 @@ class Connection
      * @param array $vars [optional]
      * @return Statement object
      */
-    protected function query($statement, $vars = null)
+    protected function query($statement, array $vars = null)
     {
         return $this->connection->query($statement, $vars);
     }
@@ -343,25 +335,27 @@ class Connection
      * @return Statement object
      * @throws ConnectionException
      */
-    protected function cacheQuery($timeout, $statement, $vars = null)
+    protected function cacheQuery($timeout, $statement, array $vars = null)
     {
-        if ($this->hasCache()) {
-            $st = null;
-            try {
-                $cache = $this->getCache();
-                $queryId = $cache->getQueryId($statement, $vars);
-                $st = $cache->read($queryId, $timeout);
-            } catch (\Exception $e) {
-                // To log debug info
-            }
+        if ($this->cache !== null) {
+            $queryId = $this->cache->getQueryId($statement, $vars);
+            $st = $this->cache->read($queryId, $timeout);
             if (!$st) {
                 // Cache miss
+                $this->debug("Cache miss!");
                 $st = $this->connection->query($statement, $vars);
-                $cache->write($queryId, $st, $timeout);
+                $this->cache->write($queryId, $st, $timeout);
             }
             return $st;
         } else {
             throw new ConnectionException('No cache engine found!');
+        }
+    }
+    
+    protected function debug($msg = '')
+    {
+        if ($this->debug === true) {
+            printf("% 10d: %s\n", memory_get_usage(), $msg);
         }
     }
 }
