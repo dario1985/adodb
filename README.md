@@ -31,6 +31,17 @@ Usage
 
 It's quite fully compatible with old ADOdb sintax:
 
-    require 'ADOdb.php'
+    require 'ADOdb.php';
     $db = NewADOConnection('mysql');
     $db->connect($server, $user, $pwd, $db);
+    
+License
+-------
+
+The MIT license, read it at http://www.opensource.org/licenses/mit-license.php
+
+Contributing
+------------
+
+Feel free to fork and improve/enhance ADOdb in any way your want. 
+If you feel that everybody will benefit from your changes, please open a pull request.
