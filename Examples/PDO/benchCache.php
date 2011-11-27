@@ -33,6 +33,7 @@ switch ($cli_options['cache']) {
 }
 
 $db = NewADOConnection('mysql');
+$db->setDebug(true);
 $db->setCache($cache);
 $db->Connect(TEST_PDO_HOSTNAME, TEST_PDO_USERNAME, TEST_PDO_PASSWORD);
 

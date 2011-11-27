@@ -70,9 +70,9 @@ class File extends \ADOdb\Cache implements \ADOdb\Driver\Cache
 
     public function flushAll()
     {
-        $it = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->cache_dir),
-            RecursiveIteratorIterator::CHILD_FIRST
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->cache_dir),
+            \RecursiveIteratorIterator::CHILD_FIRST
         );
 
         foreach ($it as $file) {

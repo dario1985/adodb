@@ -9,21 +9,13 @@
 require 'config.php';
 
 $db = NewADOConnection('mysql');
+$db->setDebug(true);
 $db->Connect(TEST_PDO_HOSTNAME, TEST_PDO_USERNAME, TEST_PDO_PASSWORD);
 $sql = "SELECT SQL_NO_CACHE * FROM test.bench LIMIT 100000";
 
 $ttotal0 = microtime(true);
 
 goto RS_CLASSIC;
-
-POPULATE:
-for($i=0; $i<1e6; $i++) {
-    $insert = sprintf('INSERT INTO test.bench VALUES (null, %d, "%s");',
-        rand(1e3,9e6), md5(time())); 
-    //echo $insert;
-    $db->execute($insert);
-}
-die('POPULATED!');
 
 RS_CLASSIC:
 /* ResultSet access */
@@ -34,8 +26,7 @@ while (!$rs->EOF) {
     $rs->MoveNext();
 }
 w('RS_CLASSIC', $t0);
-$rs = null;
-$tmp = null;
+$rs = $tmp = null;
 
 RS_ITERATOR:
 $t0 = microtime(true);
@@ -44,8 +35,7 @@ foreach ($rs as $c => $row){
     $tmp = $row;
 }
 w('RS_ITERATOR', $t0);
-$rs = null;
-$tmp = null;
+$rs = $tmp = null;
 
 
 GETALL:
