@@ -9,8 +9,10 @@
 require 'config.php';
 
 $db = NewADOConnection('mysql');
-$cache = ADOdb\Cache::create();
-$cache->setCacheDir('/tmp/adodb/');
+$db->setDebug(true);
+
+$cache = ADOdb\Cache::create(ADODB\Cache::TYPE_MEMORY);
+
 $db->setCache($cache);
 $db->Connect(TEST_PDO_HOSTNAME, TEST_PDO_USERNAME, TEST_PDO_PASSWORD);
 
