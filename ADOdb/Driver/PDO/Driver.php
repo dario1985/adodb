@@ -106,6 +106,11 @@ class Driver extends PDO
         return $this->lastInsertId($name);
     }
 
+    public function inTransaction()
+    {
+        return parent::inTransaction();
+    }
+
     public function query($statement, $vars = NULL)
     {
     if ($vars !== NULL) {

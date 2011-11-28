@@ -39,11 +39,6 @@ class Statement extends \PDOStatement
         return $this->closeCursor();
     }
     
-    public function inTransaction()
-    {
-        return parent::inTransaction();
-    }
-    
     public function getColumnMeta($column_number = 0)
     {
         $pdo_metas = parent::getColumnMeta($column_number);
