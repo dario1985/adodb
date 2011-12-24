@@ -9,6 +9,10 @@ class DriverManager
     public static function create(ADO_DataSource $dso)
     {
         switch ($dso->getType()) {
+            // All mysql* to PDO
+            case 'mysqli':
+            case 'mysqlt':
+                $dso->setType('mysql');
             case 'mysql':
             case 'pdo':
                 return new PDO\Driver($dso);
