@@ -22,23 +22,11 @@ class Connection
      * @var Driver
      */
     protected $connection;
-    protected $hostname;
-    protected $username;
-    protected $password;
-    protected $database;
-    protected $fetchMode;
-    protected $attributes = array();
     protected $debug = false;
-    
+
     public function __construct($dsn = '')
     {
-        $dso = new DataSource($dsn);
-        $this->hostname = $dso->getHostname();
-        $this->username = $dso->getUsername();
-        $this->password = $dso->getPassword();
-        $this->database = $dso->getDatabase();
-        $this->attributes = $dso->getOptions();
-        $this->dso = $dso;
+        $this->dso = new DataSource($dsn);
     }
 
     public function __destruct()
@@ -46,13 +34,33 @@ class Connection
         $this->close();
     }
 
-    /**
-     * Close connection
-     */
-    public function close()
+    public function __set($name, $value)
     {
-        $this->dso = null;
-        $this->connection = null;
+        // Deprecated old ADOdb access
+        switch($name) {
+            case 'host' : $this->dso->setHostname($value);
+                break;
+            case 'database' : $this->dso->setDatabase($value);
+                break;
+            case 'user' : $this->dso->setUsername($value);
+                break;
+            case 'password' : $this->dso->setPassword($value);
+                break;
+            case 'debug' : $this->setDebug($value);
+                break;
+        }
+    }
+
+    public function __get($name)
+    {
+        // Deprecated old ADOdb access
+        switch($name) {
+            case 'host' : return $this->dso->getHostname();
+            case 'database' : return $this->dso->getDatabase();
+            case 'user' : return $this->dso->getUsername();
+            case 'password' : return $this->dso->getPassword();
+            case 'debug' : return $this->getDebug();
+        }
     }
 
     /**
@@ -86,22 +94,30 @@ class Connection
         return true;
     }
 
+    /**
+     * Close connection
+     */
+    public function close()
+    {
+        $this->connection = null;
+    }
+
     public function setDebug($flag)
     {
         $this->debug = (bool) $flag;
     }
-    
+
     protected function setAttribute($name, $value)
     {
         if ($this->connection) {
             $this->connection->setAttribute($name, $value);
         }
-        $this->attributes[$name] = $value;
+        $this->dso->setOption($name, $value);
     }
 
     protected function getAttribute($name)
     {
-        return $this->attributes[$name];
+        return $this->dso->getOption($name);
     }
 
     public function setCache(Cache $cache)
@@ -351,7 +367,7 @@ class Connection
             throw new ConnectionException('No cache engine found!');
         }
     }
-    
+
     protected function debug($msg = '')
     {
         if ($this->debug === true) {
