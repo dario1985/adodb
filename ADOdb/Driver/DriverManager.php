@@ -9,6 +9,9 @@ class DriverManager
     public static function create(ADO_DataSource $dso)
     {
         switch ($dso->getType()) {
+            // OrientDB binary protocol:
+            case 'orientdb':
+                return new OrientDB\Driver($dso);
             // All mysql* to PDO
             case 'mysqli':
             case 'mysqlt':

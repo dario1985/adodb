@@ -44,7 +44,7 @@ class ConnectionPool {
             }
             return $this->pool->current();
         } else {
-            throw new Exception('Cannot found available connection!');
+            throw new Exception('Cannot find available connection!');
         }
     }
 }
