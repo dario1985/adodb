@@ -12,6 +12,7 @@ their application over to this version progressively.
 
 This software is in development stage. Do not use it in production environments if you do not know what you are doing.
 
+
 Drivers
 -------
 
@@ -31,7 +32,7 @@ Various engines supported out-of-box:
 Usage
 -----
 
-It's quite fully compatible with old ADOdb sintax:
+The syntax is similar (quite identical) to ADOdb sintax:
 
     require 'ADOdb.php';
     $db = NewADOConnection('mysql');
