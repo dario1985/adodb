@@ -1,4 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
-cd `dirname $0`
-phpunit $@ .
+TESTDIR=`dirname $0`
+ARGS=$@; [[ -z ARGS ]] || ARGS=$TESTDIR
+
+#############
+# RUN TESTS #
+#############
+
+cd $TESTDIR
+phpunit --bootstrap bootstrap.php $ARGS

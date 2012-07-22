@@ -1,29 +1,12 @@
-cd ..
+#!/bin/bash
 
-phpunit --skeleton-test ADOdb\\ResultsetIterator ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Exception ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Connection ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Command ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\ConnectionException ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\FieldObject ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\ResultSet ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\ADOdb ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Cache ADOdb/ADOdb.php
-mkdir ./Tests/ADOdb/
-find ADOdb/ -type f -name *Test.php -exec mv {} ./Tests/ADOdb/ \;
+ADODBPATH="../ADOdb"
 
-phpunit --skeleton-test ADOdb\\Driver\\Connection ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Driver\\ResultSet ADOdb/ADOdb.php
-mkdir ./Tests/ADOdb/Driver
-find ADOdb/ -type f -name *Test.php -exec mv {} ./Tests/ADOdb/Driver/ \;
+# Create directories
+find $ADODBPATH -type d | sed "s/\.\.\///" | xargs -t mkdir -p
 
-phpunit --skeleton-test ADOdb\\Driver\\Cache ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Driver\\Cache\\File ADOdb/ADOdb.php
-mkdir ./Tests/ADOdb/Driver/Cache
-find ADOdb/ -type f -name *Test.php -exec mv {} ./Tests/ADOdb/Driver/Cache/ \;
-
-phpunit --skeleton-test ADOdb\\Driver\\PDO\\Connection ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Driver\\PDO\\FieldObject ADOdb/ADOdb.php
-phpunit --skeleton-test ADOdb\\Driver\\PDO\\ResultSet ADOdb/ADOdb.php
-mkdir ./Tests/ADOdb/Driver/PDO
-find ADOdb/ -type f -name *Test.php -exec mv {} ./Tests/ADOdb/Driver/PDO/ \;
+# Generate tests
+rgrep -H "class " $ADODBPATH | grep ".php:" | cut -d: -f1 | sed "s/\.php//" | \
+	sed "s/^.*\/ADOdb\//ADOdb\//" | \
+	awk '$2=$1 {gsub("/","\\\\",$2); print "\\\\"$2" ../"$1".php "$2"Test "$1"Test.php"}' | \
+	xargs -t -n4 phpunit-skelgen --bootstrap bootstrap.php --test --
