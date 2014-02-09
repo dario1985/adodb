@@ -77,6 +77,22 @@ class Driver extends PDO
 
     public function setFetchMode($fetchMode)
     {
+        switch ($fetchMode) {
+            case \ADOdb\Connection::FETCH_DEFAULT:
+                $fetchMode = self::FETCH_DEFAULT;
+                break;
+            case \ADOdb\Connection::FETCH_ASSOC:
+                $fetchMode = self::FETCH_ASSOC;
+                break;
+            case \ADOdb\Connection::FETCH_NUM:
+                $fetchMode = self::FETCH_NUM;
+                break;
+            case \ADOdb\Connection::FETCH_BOTH:
+                $fetchMode = self::FETCH_BOTH;
+                break;
+            default:
+                throw new \ADOdb\ConnectionException('Unsupported fetch mode value');
+        }
         parent::setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $fetchMode);
         $this->fetchMode = $fetchMode;
     }
@@ -113,7 +129,7 @@ class Driver extends PDO
 
     public function query($statement, $vars = NULL)
     {
-    if ($vars !== NULL) {
+        if ($vars !== NULL) {
             $st = parent::prepare($statement);
             if ($st->execute($vars) !== false) {
                 return $st;

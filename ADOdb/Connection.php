@@ -317,18 +317,16 @@ class Connection
      */
     public function setFetchMode($fetchMode)
     {
-        if (!$c = $this->connection)
-            throw new ConnectionException('No connected!');
+        $this->checkConnected();
+
+        $c = $this->connection;
 
         switch ($fetchMode) {
             case self::FETCH_DEFAULT:
-                return $c->setFetchMode($c::FETCH_DEFAULT);
             case self::FETCH_ASSOC:
-                return $c->setFetchMode($c::FETCH_ASSOC);
             case self::FETCH_NUM:
-                return $c->setFetchMode($c::FETCH_NUM);
             case self::FETCH_BOTH:
-                return $c->setFetchMode($c::FETCH_BOTH);
+                return $c->setFetchMode($fetchMode);
             default:
                 throw new ConnectionException('Invalid fetch mode value');
         }
@@ -341,6 +339,7 @@ class Connection
      */
     protected function query($statement, array $vars = null)
     {
+        $this->checkConnected();
         return $this->connection->query($statement, $vars);
     }
 
@@ -372,6 +371,13 @@ class Connection
     {
         if ($this->debug === true) {
             printf("% 10d: %s\n", memory_get_usage(), $msg);
+        }
+    }
+
+    protected function checkConnected()
+    {
+        if (!$this->connection) {
+            throw new ConnectionException('No connected!');
         }
     }
 }

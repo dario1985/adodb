@@ -98,7 +98,7 @@ class ResultSet implements \Countable,
     * @return an associative array indexed by the first column of the array,
     * 	or false if the  data has less than 2 cols.
     */
-    function getAssoc($force_array = false, $first2cols = false)
+    public function getAssoc($force_array = false, $first2cols = false)
     {
         $cols = $this->numOfFields;
         if ($cols < 2) {
@@ -145,12 +145,12 @@ class ResultSet implements \Countable,
     *
     * @return false or array containing the current record
     */
-    function fetchRow()
+    public function fetchRow()
     {
         if ($this->EOF) {
             return false;
         } else {
-            $result = $this->fields;
+            $results = $this->fields;
             $this->moveNext();
             return $results;
         }

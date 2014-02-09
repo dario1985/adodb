@@ -1,0 +1,15 @@
+.idea
+/nbproject/private/
+.buildpath
+.metadata/
+.project
+*.DS_Store
+# SublimeText project files
+/*.sublime-project
+*.sublime-workspace
+Vagrantfile
+build/
+*.o
+*.lo
+*.loT
+.libs

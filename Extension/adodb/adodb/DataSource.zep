@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 (c) Dario Mancuso
+ * Copyright 2014 (c) Dario Mancuso
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -43,7 +43,7 @@ namespace ADOdb;
  */
 class DataSource
 {
-    const DSN_PARSE_REGEXP = "|^(?P<type>\\w+)([\\(](?P<dbsyntax>\\w+)[\\)])?(://(((?P<username>\\w+)(:(?P<password>\\w+))?)@)?(((?P<protocol>\\w+)\\+)?(?P<hostname>\\w+)(:(?P<port>\\d+))?)?(\\/?(?P<database>[^\\s\\?]*)?)?(\\?(?P<options>\\S+))?)?$|i";
+    const DSN_PARSE_REGEXP = "|^(?P<type>\\w+)([\\(](?P<dbsyntax>\\w+)[\\)])?(::?[/]{0,2}/(((?P<username>\\w+)(:(?P<password>\\w+))?)@)?(((?P<protocol>\\w+)\\+)?(?P<hostname>\\w+)(:(?P<port>\\d+))?)?(\\/?(?P<database>[^\\s\\?]*)?)?(\\?(?P<options>\\S+))?)?$|i";
 
     protected dsn;
     protected name;
@@ -87,29 +87,41 @@ class DataSource
     protected static function parseDSN(string dsn)
     {
         var p, options; let p = [];
-        if (preg_match(self::DSN_PARSE_REGEXP, dsn, p)) {
-            let options = p["options"];
-            if (options) {
-                var output; let output = [];
-                parse_str(options, output);
-                let options = output;
-            } else {
-                let options = [];
-            }
-            return [
-                "type"     : p["type"],
-                "dbsyntax" : p["dbsyntax"],
-                "protocol" : p["protocol"],
-                "hostname" : p["hostname"],
-                "port"     : p["port"],
-                "database" : p["database"],
-                "username" : p["username"],
-                "password" : p["password"],
-                "options"  : options
-            ];
+
+        // SQLite have slightly different DSN format
+        if (substr(dsn, 0, 6) === "sqlite") {
+        	var pos; let pos = strpos(dsn, ":");
+            let p["type"] = substr(dsn, 0, pos);
+            let p["database"] = substr(dsn, pos + 1);
+        	return [
+        		"type"	   : p["type"],
+        		"database" : p["database"]
+        	];
         } else {
-            throw new \InvalidArgumentException("Invalid DSN: ". dsn);
-        }
+        	if (preg_match(self::DSN_PARSE_REGEXP, dsn, p)) {
+				let options = p["options"];
+				if (options) {
+					var output; let output = [];
+					parse_str(options, output);
+					let options = output;
+				} else {
+					let options = [];
+				}
+				return [
+					"type"     : p["type"],
+					"dbsyntax" : p["dbsyntax"],
+					"protocol" : p["protocol"],
+					"hostname" : p["hostname"],
+					"port"     : p["port"],
+					"database" : p["database"],
+					"username" : p["username"],
+					"password" : p["password"],
+					"options"  : options
+				];
+			} else {
+				throw new \InvalidArgumentException("Invalid DSN: ". dsn);
+			}
+		}
     }
 
     public function __toString()
@@ -181,7 +193,7 @@ class DataSource
         let parsed = self::parseDSN(this->dsn);
         var name, val;
         for name, val in parsed {
-            let this->name = val;
+            let this->{name} = val;
         }
         return this;
     }
@@ -243,7 +255,7 @@ class DataSource
     protected function setOptions(var value)
     {
         if (is_array(value)) {
-            var options = [ "" ];
+            var options = null;
             parse_str(value, options);
             let this->options = options;
         } else {
