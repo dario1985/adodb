@@ -15,4 +15,12 @@
          stopOnSkipped="false"
          strict="false"
          verbose="false">
+
+    <testsuites>
+        <testsuite name="ADOdb">
+            <!--<directory suffix="Test.php">ADOdb/*</directory>-->
+            <file>ADOdb/ConnectionTest.php</file>
+        </testsuite>
+    </testsuites>
+
 </phpunit>

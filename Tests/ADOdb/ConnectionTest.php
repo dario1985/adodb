@@ -28,7 +28,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     {
     }
 
-    protected function testConnect()
+    public function testConnect()
     {
         $this->object->connect();
         return $this->object;
@@ -38,21 +38,21 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
      * @param Connection $db
      * @depends testConnect
      */
-    protected function testExecute(Connection $db)
+    public function testExecute(Connection $db)
     {
         $table = uniqid('table_');
         $db->execute("CREATE TABLE $table (id int, display varchar(100));");
-        $db->object->execute("INSERT INTO $table VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd');");
+        $db->execute("INSERT INTO $table VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd');");
         return array($table, $db);
     }
 
     /**
-     * @param $table
-     * @param $db
+     * @param $params
      * @depends testExecute
      */
-    protected function testGetAll($table, $db)
+    public function testGetAll(array $params)
     {
+        list($table, $db) = $params;
         $results = $db->getAll("SELECT * FROM $table;");
         $this->assertEquals(4, count($results));
     }

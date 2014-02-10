@@ -221,7 +221,13 @@ class DataSource
      */
     protected static function parseDSN($dsn)
     {
-        if (preg_match(self::DSN_PARSE_REGEXP, $dsn, $p)) {
+        if (substr($dsn, 0, 6) === 'sqlite') {
+            $pos = strpos($dsn, ':');
+            return array(
+                'type' => substr($dsn, 0, $pos),
+                'database' => substr($dsn, $pos + 1)
+            );
+        } elseif (preg_match(self::DSN_PARSE_REGEXP, $dsn, $p)) {
             if ($options = $p['options']) {
                 parse_str($options, $options);
             } else {

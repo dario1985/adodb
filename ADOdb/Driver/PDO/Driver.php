@@ -52,9 +52,14 @@ class Driver extends PDO
         $this->password = $dso->getPassword();
         $this->database = $dso->getDatabase();
         $this->pdoDriverOptions = $dso->getOptions();
-        $this->dsn = $this->connector
-            . ':host=' . $this->hostname
-            . ';dbname=' . $this->database;
+
+        if ($this->connector === 'sqlite' || $this->connector === 'sqlite2') {
+            $this->dsn = $this->connector . ':' . $this->database;
+		} else {
+            $this->dsn = $this->connector
+                . ':host=' . $this->hostname
+                . ';dbname=' . $this->database;
+        }
 
         parent::__construct(
             $this->dsn,

@@ -14,6 +14,8 @@ class DriverManager
             case 'mysqlt':
                 $dso->setType('mysql');
             case 'mysql':
+            case "sqlite":
+            case "sqlite2":
             case 'pdo':
                 return new PDO\Driver($dso);
         }
