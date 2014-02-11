@@ -42,7 +42,10 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $table = uniqid('table_');
         $db->execute("CREATE TABLE $table (id int, display varchar(100));");
-        $db->execute("INSERT INTO $table VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd');");
+        for ($i=1; $i<5; $i++) {
+            $value = md5($i);
+            $db->execute("INSERT INTO $table VALUES (:id, :value);", array($i, $value));
+        }
         return array($table, $db);
     }
 
@@ -50,10 +53,47 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
      * @param $params
      * @depends testExecute
      */
-    public function testGetAll(array $params)
+    public function testGetAll(array $context)
     {
-        list($table, $db) = $params;
+        list($table, $db) = $context;
         $results = $db->getAll("SELECT * FROM $table;");
         $this->assertEquals(4, count($results));
+    }
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testGetCol(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->getCol("SELECT * FROM $table;");
+        $this->assertEquals(4, count($results));
+        $this->assertEquals(1, count($results[0]));
+    }
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testGetOne(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->getOne("SELECT * FROM $table;");
+        $this->assertEquals('1', $results);
+    }
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testGetRow(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->getRow("SELECT * FROM $table;");
+        $this->assertEquals(
+            array("id" => "1", "display" => "c4ca4238a0b923820dcc509a6f75849b"),
+            $results
+        );
     }
 }

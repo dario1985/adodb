@@ -3,5 +3,4 @@ php:
   - 5.3
   - 5.4
   - 5.5
-  - hhvm
 script: cd Tests && phpunit --configuration phpunit.xml --coverage-text
