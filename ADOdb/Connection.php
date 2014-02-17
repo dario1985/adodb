@@ -363,7 +363,8 @@ class Connection
             }
             return $st;
         } else {
-            throw new ConnectionException('No cache engine found!');
+            user_error('No cache engine found!', E_USER_WARNING);
+            return $this->query($statement, $vars);
         }
     }
 

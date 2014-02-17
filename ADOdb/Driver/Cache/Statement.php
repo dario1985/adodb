@@ -39,7 +39,7 @@ class Statement implements \ADOdb\Statement
             $this->rowCount = count($this->resultsetData);
             $this->currentRow = 0;
         } else {
-            throw new InvalidArgumentException('Invalid data');
+            throw new \InvalidArgumentException('Invalid data');
         }
     }
 
