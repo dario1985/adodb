@@ -11,12 +11,12 @@ namespace ADOdb\Driver\Cache;
 class Memory extends \ADOdb\Cache implements \ADOdb\Driver\Cache
 {
     protected $_cache;
-    
+
     public function __construct()
     {
         $this->_cache = array();
     }
-    
+
     public function read($key, $ttl)
     {
         if (isset($this->_cache[$key])) {
@@ -31,19 +31,21 @@ class Memory extends \ADOdb\Cache implements \ADOdb\Driver\Cache
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache RedisLib: Cache is corrupted');
             }
-        } else return false;        
+        } else {
+            return false;
+        }
     }
-    
+
     public function write($key, \ADOdb\Statement $value, $ttl)
     {
         $this->_cache[$key] = $this->serializeStatement($value);
     }
-    
+
     public function flush($key)
     {
         unset($this->_cache[$key]);
     }
-    
+
     public function flushAll()
     {
         $this->_cache = array();

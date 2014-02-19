@@ -36,7 +36,9 @@ class File extends \ADOdb\Cache implements \ADOdb\Driver\Cache
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache File: Cache is corrupted');
             }
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     public function write($key, \ADOdb\Statement $value, $ttl)

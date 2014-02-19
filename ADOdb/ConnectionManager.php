@@ -8,11 +8,13 @@
 
 namespace ADOdb;
 
-class ConnectionManager {
+class ConnectionManager
+{
 
     private $instance;
 
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (!self::$instance) {
             self::$instance = new ConnectionManager();
         }

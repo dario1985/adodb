@@ -12,8 +12,7 @@ namespace ADOdb;
 /**
  * Resultset Class
  */
-class ResultSet implements \Countable, 
-                           \IteratorAggregate
+class ResultSet implements \Countable, \IteratorAggregate
 {
 
     /**
@@ -21,7 +20,7 @@ class ResultSet implements \Countable,
      * @var Cache
      */
     protected $cache = null;
-    
+
     /**
      * Statement object
      * @var Statement
@@ -34,9 +33,9 @@ class ResultSet implements \Countable,
     protected $EOF = false;
     protected $numOfRows = null;
     protected $numOfFields = null;
-    
+
     protected $bufferedResults = null;
-    
+
     protected $publicProperties = array(
         'timeCreated' => 1,
         'numOfFields' => 1,
@@ -83,31 +82,31 @@ class ResultSet implements \Countable,
     }
 
     /**
-    * Return whole recordset as a 2-dimensional associative array if there are more than 2 columns.
-    * The first column is treated as the key and is not included in the array.
-    * If there is only 2 columns, it will return a 1 dimensional array of key-value pairs unless
-    * $force_array == true.
-    *
-    * @param bool $force_array (Optional) has only meaning if we have 2 data columns. If false, a 1 dimensional
-    * 	array is returned, otherwise a 2 dimensional array is returned. If this sounds confusing,
-    * 	read the source.
-    *
-    * @param bool $first2cols (Optional) means if there are more than 2 cols, ignore the remaining cols and
-    * instead of returning array[col0] => array(remaining cols), return array[col0] => col1
-    *
-    * @return an associative array indexed by the first column of the array,
-    * 	or false if the  data has less than 2 cols.
-    */
+     * Return whole recordset as a 2-dimensional associative array if there are more than 2 columns.
+     * The first column is treated as the key and is not included in the array.
+     * If there is only 2 columns, it will return a 1 dimensional array of key-value pairs unless
+     * $force_array == true.
+     *
+     * @param bool $force_array (Optional) has only meaning if we have 2 data columns. If false, a 1 dimensional
+     *    array is returned, otherwise a 2 dimensional array is returned. If this sounds confusing,
+     *    read the source.
+     *
+     * @param bool $first2cols (Optional) means if there are more than 2 cols, ignore the remaining cols and
+     * instead of returning array[col0] => array(remaining cols), return array[col0] => col1
+     *
+     * @return an associative array indexed by the first column of the array,
+     *    or false if the  data has less than 2 cols.
+     */
     public function getAssoc($force_array = false, $first2cols = false)
     {
         $cols = $this->numOfFields;
         if ($cols < 2) {
             return false;
         }
-        
+
         $useNumIndex = isset($this->fields[0]);
         $results = array();
-    
+
         if ($first2cols === false && ($cols > 2 || $force_array === true)) {
             if ($useNumIndex === true) {
                 while (!$this->EOF) {
@@ -135,16 +134,16 @@ class ResultSet implements \Countable,
                 }
             }
         }
-    
+
         return $results;
     }
-    
+
     /**
-    * Fetch a row, returning false if no more rows.
-    * This is PEAR DB compat mode but widely used in ADOdb apps
-    *
-    * @return false or array containing the current record
-    */
+     * Fetch a row, returning false if no more rows.
+     * This is PEAR DB compat mode but widely used in ADOdb apps
+     *
+     * @return false or array containing the current record
+     */
     public function fetchRow()
     {
         if ($this->EOF) {
@@ -155,7 +154,7 @@ class ResultSet implements \Countable,
             return $results;
         }
     }
-    
+
     /**
      * Some databases allow multiple recordsets to be returned. This function
      * will return true if there is a next recordset, or false if no more.
@@ -186,11 +185,13 @@ class ResultSet implements \Countable,
      */
     public function moveLast()
     {
-        if ($this->numOfRows > 0)
+        if ($this->numOfRows > 0) {
             return $this->move($this->numOfRows - 2);
+        }
 
-        if ($this->EOF)
+        if ($this->EOF) {
             return false;
+        }
     }
 
     /**
@@ -279,7 +280,7 @@ class ResultSet implements \Countable,
         }
         return $fields;
     }
-    
+
     public function fetchField($column_number = 0)
     {
         $field = $this->statement->getColumnMeta($column_number);
@@ -300,11 +301,11 @@ class ResultSet implements \Countable,
     {
         return $this->numOfFields;
     }
-    
+
     /*
      * IteratorAggregate Interface
      */
-    
+
     /**
      * Return ResultSetIterator
      * @return RecordsetIterator
@@ -313,11 +314,11 @@ class ResultSet implements \Countable,
     {
         return new ResultsetIterator($this);
     }
-    
+
     /*
      * Countable Interface
      */
-    
+
     /**
      * Return RecordCount
      * @return int Row Count
@@ -326,7 +327,7 @@ class ResultSet implements \Countable,
     {
         return $this->numOfRows;
     }
-    
+
     public function close()
     {
         if ($this->statement !== null) {

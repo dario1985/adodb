@@ -37,16 +37,21 @@ class Connection
     public function __set($name, $value)
     {
         // Deprecated old ADOdb access
-        switch($name) {
-            case 'host' : $this->dso->setHostname($value);
+        switch ($name) {
+            case 'host':
+                $this->dso->setHostname($value);
                 break;
-            case 'database' : $this->dso->setDatabase($value);
+            case 'database':
+                $this->dso->setDatabase($value);
                 break;
-            case 'user' : $this->dso->setUsername($value);
+            case 'user':
+                $this->dso->setUsername($value);
                 break;
-            case 'password' : $this->dso->setPassword($value);
+            case 'password':
+                $this->dso->setPassword($value);
                 break;
-            case 'debug' : $this->setDebug($value);
+            case 'debug':
+                $this->setDebug($value);
                 break;
         }
     }
@@ -54,12 +59,17 @@ class Connection
     public function __get($name)
     {
         // Deprecated old ADOdb access
-        switch($name) {
-            case 'host' : return $this->dso->getHostname();
-            case 'database' : return $this->dso->getDatabase();
-            case 'user' : return $this->dso->getUsername();
-            case 'password' : return $this->dso->getPassword();
-            case 'debug' : return $this->getDebug();
+        switch ($name) {
+            case 'host':
+                return $this->dso->getHostname();
+            case 'database':
+                return $this->dso->getDatabase();
+            case 'user':
+                return $this->dso->getUsername();
+            case 'password':
+                return $this->dso->getPassword();
+            case 'debug':
+                return $this->getDebug();
         }
     }
 
@@ -77,18 +87,25 @@ class Connection
             return false;
         }
 
-        if ($hostname)
+        if ($hostname) {
             $this->dso->setHostname($hostname);
-        if ($username)
+        }
+
+        if ($username) {
             $this->dso->setUsername($username);
-        if ($password)
+        }
+
+        if ($password) {
             $this->dso->setPassword($password);
-        if ($database)
+        }
+
+        if ($database) {
             $this->dso->setDatabase($database);
+        }
 
         $this->connection = Driver\DriverManager::create($this->dso);
 
-        foreach ((array) $options as $option => $value) {
+        foreach ((array)$options as $option => $value) {
             $this->setAttribute($option, $value);
         }
         return true;
@@ -104,7 +121,7 @@ class Connection
 
     public function setDebug($flag)
     {
-        $this->debug = (bool) $flag;
+        $this->debug = (bool)$flag;
     }
 
     protected function setAttribute($name, $value)
@@ -134,7 +151,9 @@ class Connection
     {
         if (!$this->connection->inTransaction()) {
             return $this->connection->beginTransaction();
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -282,8 +301,9 @@ class Connection
         $st = $this->query($statement, $vars);
         if ($st !== false) {
             return new ResultSet($st);
-        } else
+        } else {
             return false;
+        }
     }
 
     /**

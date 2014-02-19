@@ -37,4 +37,3 @@ abstract class Command
      */
     abstract protected function processResults();
 }
-

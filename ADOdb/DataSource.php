@@ -58,9 +58,9 @@ class DataSource
     protected $password;
     protected $options;
 
-    function __construct($dsn = NULL)
+    public function __construct($dsn = null)
     {
-        if ($dsn !== NULL) {
+        if ($dsn !== null) {
             $this->setDsn($dsn);
         }
     }
@@ -122,8 +122,9 @@ class DataSource
 
     public function getOption($name)
     {
-        if (isset($this->options[$name]))
+        if (isset($this->options[$name])) {
             return $this->options[$name];
+        }
     }
 
     public function setDsn($value)
@@ -162,7 +163,7 @@ class DataSource
 
     public function setPort($value)
     {
-        $this->port = (int) $value;
+        $this->port = (int)$value;
         return $this;
     }
 
@@ -210,7 +211,7 @@ class DataSource
      *  dbsyntax: Database used with regards to SQL syntax etc.
      *  protocol: Communication protocol to use (tcp, unix etc.)
      *  hostname: Hostname specification
-         *  port    : Port
+     *  port    : Port
      *  database: Database to use on the DBMS server
      *  username: User name for login
      *  password: Password for login
@@ -234,16 +235,18 @@ class DataSource
                 $options = array();
             }
             return array(
-                'type'     => $p['type'],
+                'type' => $p['type'],
                 'dbsyntax' => $p['dbsyntax'],
                 'protocol' => $p['protocol'],
                 'hostname' => $p['hostname'],
-                'port'     => $p['port'],
+                'port' => $p['port'],
                 'database' => $p['database'],
                 'username' => $p['username'],
                 'password' => $p['password'],
-                'options'  => $options
+                'options' => $options
             );
-        } else throw new \InvalidArgumentException('Invalid DSN: '. $dsn);
+        } else {
+            throw new \InvalidArgumentException('Invalid DSN: ' . $dsn);
+        }
     }
 }

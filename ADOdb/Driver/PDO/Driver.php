@@ -8,15 +8,14 @@
 
 namespace ADOdb\Driver\PDO;
 
-use \PDO as PDO,
-    \ADOdb\Driver as ADODB_Driver,
-    \ADOdb\DataSource as ADODB_DataSource;
+use \PDO as PDO;
+use \ADOdb\Driver as ADODB_Driver;
+use \ADOdb\DataSource as ADODB_DataSource;
 
 /**
  * Connection and query wrapper
  */
-class Driver extends PDO 
-                 implements ADODB_Driver
+class Driver extends PDO implements ADODB_Driver
 {
     const FETCH_DEFAULT = PDO::FETCH_ASSOC;
 
@@ -55,7 +54,7 @@ class Driver extends PDO
 
         if ($this->connector === 'sqlite' || $this->connector === 'sqlite2') {
             $this->dsn = $this->connector . ':' . $this->database;
-		} else {
+        } else {
             $this->dsn = $this->connector
                 . ':host=' . $this->hostname
                 . ';dbname=' . $this->database;
@@ -123,7 +122,7 @@ class Driver extends PDO
      * Retrieve the ID of the last insert operation
      * @return String containing last insert ID
      */
-    public function getLastInsertId($name = NULL)
+    public function getLastInsertId($name = null)
     {
         return $this->lastInsertId($name);
     }
@@ -133,19 +132,20 @@ class Driver extends PDO
         return parent::inTransaction();
     }
 
-    public function query($statement, $vars = NULL)
+    public function query($statement, $vars = null)
     {
-        if ($vars !== NULL) {
+        if ($vars !== null) {
             $st = parent::prepare($statement);
             if ($st->execute($vars) !== false) {
                 return $st;
             } else {
                 return false;
             }
-        } return parent::query($statement);
+        }
+        return parent::query($statement);
     }
 
-    public function execute($sql, $vars=null)
+    public function execute($sql, $vars = null)
     {
         return parent::exec($sql, $vars);
     }

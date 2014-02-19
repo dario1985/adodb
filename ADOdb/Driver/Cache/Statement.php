@@ -16,7 +16,7 @@ class Statement implements \ADOdb\Statement
     const FETCH_NUM = 1;
     const FETCH_ASSOC = 2;
     const FETCH_BOTH = 3;
-    
+
     protected $resultsetData;
     protected $rowCount;
     protected $columnMeta;
@@ -34,7 +34,7 @@ class Statement implements \ADOdb\Statement
             $this->columnMeta = $data['COLUMN_META'];
             $this->initResultsetData($data['RESULTSET']);
             if (isset($data['CREATED'])) {
-                $this->timeCreated = (int) $data['CREATED'];
+                $this->timeCreated = (int)$data['CREATED'];
             }
             $this->rowCount = count($this->resultsetData);
             $this->currentRow = 0;
@@ -51,7 +51,7 @@ class Statement implements \ADOdb\Statement
             $this->columnMap[] = $c['name'];
         }
     }
-    
+
     public function __destruct()
     {
         $this->data = $this->columnMap = $this->columnMeta = null;
@@ -102,13 +102,14 @@ class Statement implements \ADOdb\Statement
         if ($offset === null) {
             $offset = $this->currentRow++;
         }
-        
+
         if ($offset < $this->rowCount) {
             $row = $this->resultsetData[$offset];
             if ($this->fetchMode & self::FETCH_ASSOC) {
                 if ($this->fetchMode & self::FETCH_NUM) {
                     return array_merge(
-                        $row, array_combine($this->columnMap, $row)
+                        $row,
+                        array_combine($this->columnMap, $row)
                     );
                 } else {
                     return array_combine($this->columnMap, $row);
@@ -116,24 +117,28 @@ class Statement implements \ADOdb\Statement
             } else {
                 return $row;
             }
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     public function fetchAll($fetch_style = null)
     {
         $fetch_style = $fetch_style !== null ? $fetch_style : $this->fetchMode;
-        
+
         if ($this->fetchMode & self::FETCH_ASSOC) {
             $data = array();
             if ($this->fetchMode & self::FETCH_NUM) {
-                foreach ($this->resultsetData as $row)
+                foreach ($this->resultsetData as $row) {
                     $data[] = array_merge(
-                        $row, 
+                        $row,
                         array_combine($this->columnMap, $row)
                     );
+                }
             } else {
-                foreach ($this->resultsetData as $row)
+                foreach ($this->resultsetData as $row) {
                     $data[] = array_combine($this->columnMap, $row);
+                }
             }
             return $data;
         } else {
@@ -145,19 +150,21 @@ class Statement implements \ADOdb\Statement
     {
         if ($this->currentRow < $this->rowCount) {
             return $this->resultsetData[$this->currentRow++][$column_number];
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     public function getColumnMeta($column_number = 0)
     {
         return new ADODB_FieldObject($this->columnMeta[$column_number]);
     }
-    
+
     public function setFetchMode($mode)
     {
         $this->fetchMode = $mode;
     }
-    
+
     public function dump()
     {
         throw new \RuntimeException('Cannot dump a cached statement');

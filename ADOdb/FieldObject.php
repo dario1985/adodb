@@ -18,18 +18,18 @@ class FieldObject
     protected $type;
     protected $not_null = false;
     protected $has_default = false;
-    protected $default_value; 
-    
-    public function __get($name) 
+    protected $default_value;
+
+    public function __get($name)
     {
         return $this->$name;
     }
-    
+
     public function __set($name, $value = null)
     {
         $this->$name = $value;
     }
-    
+
     public function __construct($fieldMetaData = null)
     {
         if ($fieldMetaData) {
@@ -38,16 +38,16 @@ class FieldObject
             }
         }
     }
-    
+
     public function __toArray()
     {
         return array(
-                    'name' => $this->name,
-                    'max_length' => $this->max_length,
-                    'type' => $this->type,
-                    'not_null' => $this->not_null,
-                    'has_default' => $this->has_default,
-                    'default_value' => $this->default_value 
-                );
+            'name' => $this->name,
+            'max_length' => $this->max_length,
+            'type' => $this->type,
+            'not_null' => $this->not_null,
+            'has_default' => $this->has_default,
+            'default_value' => $this->default_value
+        );
     }
 }

@@ -16,4 +16,3 @@ class Query
     protected $model;
     protected $fields;
 }
-

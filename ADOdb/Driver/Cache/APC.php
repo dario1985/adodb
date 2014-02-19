@@ -19,7 +19,7 @@ class APC extends \ADOdb\Cache implements \ADOdb\Driver\Cache
             user_error('APC Cache will don\'t persist between CLI executions.', E_USER_NOTICE);
         }
     }
-    
+
     public function read($key, $ttl)
     {
         if ($val = apc_fetch($key)) {
@@ -34,21 +34,25 @@ class APC extends \ADOdb\Cache implements \ADOdb\Driver\Cache
             } else {
                 throw new \ADOdb\Exception('ADOdb Cache APC: Cache is corrupted');
             }
-        } else return false;        
+        } else {
+            return false;
+        }
     }
-    
+
     public function write($key, \ADOdb\Statement $value, $ttl)
     {
         if (apc_store($key, $this->serializeStatement($value), $ttl) === false) {
             throw new \ADOdb\Exception('ADOdb Cache APC: Cannot store value. Is APC enabled?');
-        } else return true;
+        } else {
+            return true;
+        }
     }
-    
+
     public function flush($key)
     {
         return apc_delete($key);
     }
-    
+
     public function flushAll()
     {
         return apc_clear_cache('user');

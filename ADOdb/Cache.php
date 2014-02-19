@@ -18,7 +18,7 @@ class Cache
     const TYPE_LIBREDIS = 3;
 
     const KEY_PREFIX = 'DB_';
-    
+
     public static function getQueryId($sql, array $params = null)
     {
         if ($params !== null) {

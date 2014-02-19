@@ -8,7 +8,8 @@
 
 namespace ADOdb;
 
-class ConnectionPool {
+class ConnectionPool
+{
 
     private static $instance;
 
@@ -18,25 +19,29 @@ class ConnectionPool {
     const READ_WRITE = 1;
     const READ_ONLY = 2;
 
-    public function __construct() {
-        $this->pool= new \SplObjectStorage();
+    public function __construct()
+    {
+        $this->pool = new \SplObjectStorage();
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->pool = null;
     }
 
     /**
      * Add connection
      */
-    public function add(Connection $connection) {
+    public function add(Connection $connection)
+    {
         $this->pool->attach($connection);
     }
 
     /**
      * Get connection
      */
-    public function get() {
+    public function get()
+    {
         if ($this->pool->count() > 0) {
             $this->pool->next();
             if (!$this->pool->valid()) {

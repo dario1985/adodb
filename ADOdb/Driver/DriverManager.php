@@ -13,6 +13,7 @@ class DriverManager
             case 'mysqli':
             case 'mysqlt':
                 $dso->setType('mysql');
+                // no break
             case 'mysql':
             case "sqlite":
             case "sqlite2":

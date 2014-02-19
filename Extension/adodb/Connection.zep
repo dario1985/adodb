@@ -125,7 +125,7 @@ class Connection
         return this->dso->getOption(name);
     }
 
-    public function setCache(<ADOdb\Cache> cache)
+    public function setCache(<Cache> cache)
     {
         let this->cache = cache;
     }

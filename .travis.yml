@@ -1,6 +1,21 @@
 language: php
+
 php:
   - 5.3
   - 5.4
   - 5.5
-script: cd Tests && phpunit --configuration phpunit.xml --coverage-text
+  - 5.6
+
+matrix:
+  allow_failures:
+  - php: 5.6 
+
+install:
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
+  - ./Tests/ci/install-prereqs.sh
+
+script:
+  - phpcs --standard=PSR2 --report-summary --report=emacs --extensions=php --warning-severity=0 ADOdb/
+  - cd Tests && phpunit --configuration phpunit.xml --coverage-text
+  - cd ../Extension && zephir build && phpenv config-add adodb.ini
+  - cd ../Tests && phpunit --configuration phpunit.xml --coverage-text
