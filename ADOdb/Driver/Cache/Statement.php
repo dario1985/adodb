@@ -126,9 +126,9 @@ class Statement implements \ADOdb\Statement
     {
         $fetch_style = $fetch_style !== null ? $fetch_style : $this->fetchMode;
 
-        if ($this->fetchMode & self::FETCH_ASSOC) {
+        if ($fetch_style & self::FETCH_ASSOC) {
             $data = array();
-            if ($this->fetchMode & self::FETCH_NUM) {
+            if ($fetch_style & self::FETCH_NUM) {
                 foreach ($this->resultsetData as $row) {
                     $data[] = array_merge(
                         $row,
@@ -167,6 +167,10 @@ class Statement implements \ADOdb\Statement
 
     public function dump()
     {
-        throw new \RuntimeException('Cannot dump a cached statement');
+        return array(
+            'RESULTSET' => $this->fetchAll(self::FETCH_NUM),
+            'COLUMN_META' => $this->columnMeta,
+            'CREATED' => $this->timeCreated
+        );
     }
 }

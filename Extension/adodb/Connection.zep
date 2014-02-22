@@ -23,6 +23,7 @@ class Connection
     protected connection;
     protected debug = false;
 	protected cache;
+	protected defaultCacheType = 0; // Cache::TYPE_MEMORY;
 
     public function __construct(string dsn = "")
     {
@@ -91,6 +92,10 @@ class Connection
 		}
 
         let this->connection = Driver\DriverManager::create(this->dso);
+
+        if (this->cache === null) {
+            let this->cache = Cache::create(this->defaultCacheType);
+        }
 
 		var option, value;
         for option, value in options {
@@ -372,7 +377,8 @@ class Connection
             if (!st) {
                 // Cache miss
                 this->debug("Cache miss!");
-                let st = this->connection->query(statement, vars);
+                var tmpSt; let tmpSt = this->connection->query(statement, vars);
+                let st = Cache::createCacheableEstatement(tmpSt);
                 this->cache->write(queryId, st, timeout);
             }
             return st;

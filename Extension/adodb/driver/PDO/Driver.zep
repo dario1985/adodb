@@ -79,9 +79,6 @@ class Driver implements \ADOdb\Driver
     public function setFetchMode(fetchMode)
     {
         switch (fetchMode) {
-            case \ADOdb\Connection::FETCH_DEFAULT:
-                let fetchMode = self::FETCH_DEFAULT;
-                break;
             case \ADOdb\Connection::FETCH_ASSOC:
                 let fetchMode = \PDO::FETCH_ASSOC;
                 break;

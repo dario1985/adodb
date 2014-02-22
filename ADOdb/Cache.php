@@ -57,4 +57,9 @@ class Cache
             throw new Exception('Unserialize error');
         }
     }
+
+    public static function createCacheableEstatement(Statement $statement)
+    {
+        return new Driver\Cache\Statement($statement->dump());
+    }
 }

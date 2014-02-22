@@ -12,10 +12,6 @@ use ADOdb\FieldObject as ADODB_FieldObject;
 
 class Statement extends \PDOStatement implements \ADOdb\Statement
 {
-    const FETCH_NUM = Driver::FETCH_NUM;
-    const FETCH_ASSOC = Driver::FETCH_ASSOC;
-    const FETCH_BOTH = Driver::FETCH_BOTH;
-
     protected $timeCreated;
 
     protected function __construct()
@@ -36,6 +32,19 @@ class Statement extends \PDOStatement implements \ADOdb\Statement
     public function close()
     {
         return $this->closeCursor();
+    }
+
+    public function fetchAll($fetch_style = null, $class_name = null, $ctor_args = null)
+    {
+        if ($fetch_style === Driver::FETCH_NUM) {
+            $return = array();
+            while ($val = $this->fetch(Driver::FETCH_NUM)) {
+                $return[] = $val;
+            }
+            return $return;
+        } else {
+            return parent::fetchAll($fetch_style);
+        }
     }
 
     public function getColumnMeta($column_number = 0)
@@ -62,7 +71,7 @@ class Statement extends \PDOStatement implements \ADOdb\Statement
             );
         }
         return array(
-            'RESULTSET' => $this->fetchAll(self::FETCH_NUM),
+            'RESULTSET' => $this->fetchAll(Driver::FETCH_NUM),
             'COLUMN_META' => $metas,
             'CREATED' => $this->timeCreated
         );

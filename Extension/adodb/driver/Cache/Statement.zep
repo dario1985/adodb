@@ -130,9 +130,9 @@ class Statement implements \ADOdb\Statement
     {
         let fetch_style = fetch_style !== null ? fetch_style : this->fetchMode;
 
-        if (this->fetchMode & self::FETCH_ASSOC) {
+        if (fetch_style & self::FETCH_ASSOC) {
             var data, row; let data = [];
-            if (this->fetchMode & self::FETCH_NUM) {
+            if (fetch_style & self::FETCH_NUM) {
                 for row in this->resultsetData {
                     let data[] = array_merge(
                         row,
@@ -154,7 +154,7 @@ class Statement implements \ADOdb\Statement
     {
         if (this->currentRow < this->rowCount) {
             let this->currentRow++;
-            return this->resultsetData[this->currentRow][column_number];
+            return this->resultsetData[this->currentRow - 1][column_number];
         } else {
             return false;
         }
@@ -172,6 +172,10 @@ class Statement implements \ADOdb\Statement
 
     public function dump()
     {
-        throw new \RuntimeException("Cannot dump a cached statement");
+        return [
+            "RESULTSET" : this->fetchAll(self::FETCH_NUM),
+            "COLUMN_META" : this->columnMeta,
+            "CREATED" : this->timeCreated
+        ];
     }
 }

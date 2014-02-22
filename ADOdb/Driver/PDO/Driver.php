@@ -17,7 +17,11 @@ use \ADOdb\DataSource as ADODB_DataSource;
  */
 class Driver extends PDO implements ADODB_Driver
 {
-    const FETCH_DEFAULT = PDO::FETCH_ASSOC;
+    protected static $fetchStyles = array(
+        \ADOdb\Connection::FETCH_NUM => self::FETCH_NUM,
+        \ADOdb\Connection::FETCH_ASSOC => self::FETCH_ASSOC,
+        \ADOdb\Connection::FETCH_BOTH => self::FETCH_BOTH
+    );
 
     /** Connection information (database name is public) */
     protected $dsn;
@@ -77,29 +81,18 @@ class Driver extends PDO implements ADODB_Driver
             $this->setAttribute($attr, $value);
         }
 
-        $this->setFetchMode(self::FETCH_DEFAULT);
+        $this->setFetchMode(self::FETCH_ASSOC);
     }
 
     public function setFetchMode($fetchMode)
     {
-        switch ($fetchMode) {
-            case \ADOdb\Connection::FETCH_DEFAULT:
-                $fetchMode = self::FETCH_DEFAULT;
-                break;
-            case \ADOdb\Connection::FETCH_ASSOC:
-                $fetchMode = self::FETCH_ASSOC;
-                break;
-            case \ADOdb\Connection::FETCH_NUM:
-                $fetchMode = self::FETCH_NUM;
-                break;
-            case \ADOdb\Connection::FETCH_BOTH:
-                $fetchMode = self::FETCH_BOTH;
-                break;
-            default:
-                throw new \ADOdb\ConnectionException('Unsupported fetch mode value');
+        if (isset(self::$fetchStyles[$fetchMode])) {
+            $fetchMode = self::$fetchStyles[$fetchMode];
+            parent::setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $fetchMode);
+            $this->fetchMode = $fetchMode;
+        } else {
+            throw new \ADOdb\ConnectionException('Unsupported fetch mode value');
         }
-        parent::setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, $fetchMode);
-        $this->fetchMode = $fetchMode;
     }
 
     public function setAttribute($attribute, $value = null)

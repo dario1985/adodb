@@ -96,4 +96,53 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
             $results
         );
     }
+
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testCacheGetAll(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->CacheGetAll(30, "SELECT * FROM $table;");
+        $this->assertEquals(4, count($results));
+    }
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testCacheGetCol(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->CacheGetCol(30, "SELECT * FROM $table;");
+        $this->assertEquals(4, count($results));
+        $this->assertEquals(1, count($results[0]));
+    }
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testCacheGetOne(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->CacheGetOne(30, "SELECT * FROM $table;");
+        $this->assertEquals('1', $results);
+    }
+
+    /**
+     * @param $params
+     * @depends testExecute
+     */
+    public function testCacheGetRow(array $context)
+    {
+        list($table, $db) = $context;
+        $results = $db->CacheGetRow(30, "SELECT * FROM $table;");
+        $this->assertEquals(
+            array("id" => "1", "display" => "c4ca4238a0b923820dcc509a6f75849b"),
+            $results
+        );
+    }
 }

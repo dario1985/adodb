@@ -22,7 +22,21 @@ class Connection
      * @var Driver
      */
     protected $connection;
+
+    /**
+     * @var Cache
+     */
+    protected $cache;
+
+    /**
+     * @var bool
+     */
     protected $debug = false;
+
+    /**
+     * @var string
+     */
+    protected $defaultCacheType = Cache::TYPE_MEMORY;
 
     public function __construct($dsn = '')
     {
@@ -104,6 +118,10 @@ class Connection
         }
 
         $this->connection = Driver\DriverManager::create($this->dso);
+
+        if ($this->cache === null) {
+            $this->cache = Cache::create($this->defaultCacheType);
+        }
 
         foreach ((array)$options as $option => $value) {
             $this->setAttribute($option, $value);
@@ -378,7 +396,8 @@ class Connection
             if (!$st) {
                 // Cache miss
                 $this->debug("Cache miss!");
-                $st = $this->connection->query($statement, $vars);
+                $tmpSt = $this->connection->query($statement, $vars);
+                $st = Cache::createCacheableEstatement($tmpSt);
                 $this->cache->write($queryId, $st, $timeout);
             }
             return $st;

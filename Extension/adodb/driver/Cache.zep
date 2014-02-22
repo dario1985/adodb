@@ -13,5 +13,4 @@ interface Cache
     public function write(key, <\ADOdb\Statement> value, ttl);
     public function flush(key);
     public function flushAll();
-
 }

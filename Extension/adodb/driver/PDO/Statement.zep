@@ -9,10 +9,6 @@ namespace ADOdb\Driver\PDO;
 
 class Statement implements \ADOdb\Statement
 {
-    const FETCH_NUM = 3; // Driver::FETCH_NUM;
-    const FETCH_ASSOC = 2; // Driver::FETCH_ASSOC;
-    const FETCH_BOTH = 4; // Driver::FETCH_BOTH;
-    
     protected timeCreated;
     protected st;
 
@@ -36,7 +32,7 @@ class Statement implements \ADOdb\Statement
     {
         return this->st->closeCursor();
     }
-    
+
     public function getColumnMeta(column_number = 0)
     {
         var pdo_metas; let pdo_metas = this->st->getColumnMeta(column_number);
@@ -68,7 +64,7 @@ class Statement implements \ADOdb\Statement
             let col++;
         }
         return [
-            "RESULTSET" : this->fetchAll(self::FETCH_NUM), 
+            "RESULTSET" : this->fetchAll(\PDO::FETCH_NUM),
             "COLUMN_META" : metas, 
             "CREATED" : this->timeCreated
         ];
@@ -99,9 +95,20 @@ class Statement implements \ADOdb\Statement
         return this->st->$fetch(offset);
     }
 
-    public function fetchAll(fetch_style = null)
+    public function fetchAll(fetch_style = null, class_name = NULL, ctor_args = NULL)
     {
-        return this->st->fetchAll(fetch_style);
+        if (fetch_style === \PDO::FETCH_NUM) {
+            var returns = [];
+            var val;
+            let val = this->st->$fetch(\PDO::FETCH_NUM);
+            while val {
+                let returns[] = val;
+                let val = this->st->$fetch(\PDO::FETCH_NUM);
+            }
+            return returns;
+        } else {
+            return this->st->fetchAll(fetch_style);
+        }
     }
 
     public function fetchColumn(int column_number = 0)
