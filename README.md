@@ -1,5 +1,4 @@
-
-ADOdb-PHP5.3 [![Build Status](https://travis-ci.org/dario1985/adodb.png)](https://travis-ci.org/dario1985/adodb)
+ADOdb-PHP5.3 [![Build Status](https://travis-ci.org/dario1985/adodb.png)](https://travis-ci.org/dario1985/adodb) [![Coverage Status](https://coveralls.io/repos/dario1985/adodb/badge.png)](https://coveralls.io/r/dario1985/adodb) 
 =============
 
 This is an full refactored version of ADOdb library for PHP 5.3+.
